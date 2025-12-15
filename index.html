@@ -58,11 +58,14 @@ let yaw=0,pitch=0;let move={x:0,z:0};
 
 /* ===== JOYSTICK ===== */
 const joy=document.getElementById('joystick');const stick=document.getElementById('stick');
+let joyActive=false;
+joy.ontouchstart=e=>{joyActive=true;e.preventDefault()};
 joy.ontouchmove=e=>{const r=joy.getBoundingClientRect(),t=e.touches[0];let dx=t.clientX-(r.left+r.width/2),dy=t.clientY-(r.top+r.height/2);dx=Math.max(-40,Math.min(40,dx));dy=Math.max(-40,Math.min(40,dy));stick.style.left=40+dx+'px';stick.style.top=40+dy+'px';move.x=dx/40;move.z=dy/40};
-joy.ontouchend=()=>{move={x:0,z:0};stick.style.left='40px';stick.style.top='40px'};
+joy.ontouchend=e=>{joyActive=false;move={x:0,z:0};stick.style.left='40px';stick.style.top='40px'}=()=>{move={x:0,z:0};stick.style.left='40px';stick.style.top='40px'};
 
 /* ===== SAUT ===== */
-document.getElementById('jump').ontouchstart=e=>{e.stopPropagation();if(player.onGround){player.vel.y=0.25;player.onGround=false}};
+const jumpBtn=document.getElementById('jump');
+jumpBtn.ontouchstart=e=>{e.preventDefault();e.stopPropagation();if(player.onGround){player.vel.y=0.28;player.onGround=false}};=e=>{e.stopPropagation();if(player.onGround){player.vel.y=0.25;player.onGround=false}};
 
 /* ===== CAMÉRA + BLOCS ===== */
 const ray=new THREE.Raycaster();let look=false;let lx=0,ly=0;
@@ -84,12 +87,16 @@ window.addEventListener('touchend',e=>{
 function update(){
  player.vel.x=move.x*0.1;
  player.vel.z=move.z*0.1;
- player.vel.y-=0.015;
+ player.vel.y-=0.03;
  player.pos.add(player.vel);
  // collision simple avec blocs
  const bx=Math.round(player.pos.x);
  const bz=Math.round(player.pos.z);
- const under=blocks[`${bx},${Math.floor(player.pos.y-1)},${bz}`];
+ // sol / collision
+ const px=Math.round(player.pos.x);
+ const pz=Math.round(player.pos.z);
+ const by=Math.floor(player.pos.y-1.8);
+ const under=blocks[`${px},${by},${pz}`];[`${bx},${Math.floor(player.pos.y-1)},${bz}`];
  if(under){player.pos.y=Math.floor(player.pos.y)+1.8;player.vel.y=0;player.onGround=true}else{player.onGround=false}
 player.vel.x=move.x*0.1;player.vel.z=move.z*0.1;player.vel.y-=0.01;player.pos.add(player.vel);if(player.pos.y<1.8){player.pos.y=1.8;player.vel.y=0;player.onGround=true}camera.position.copy(player.pos);
  camera.rotation.order='YXZ';
@@ -100,7 +107,3 @@ window.onresize=()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectio
 </script>
 </body>
 </html>
-
-
-
-
