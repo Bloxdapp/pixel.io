@@ -2,126 +2,147 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Mini Minecraft 3D – Créatif</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mini Minecraft 3D – Vrai 3D</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <style>
-body{margin:0;background:#1b1b1b;color:white;font-family:Arial;text-align:center}
-canvas{background:#87ceeb;display:block;margin:10px auto;border:2px solid white}
-#ui{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
-.block{width:30px;height:30px;border:2px solid white;cursor:pointer}
-.selected{outline:3px solid yellow}
+body{margin:0;overflow:hidden;background:black}
+#ui{position:fixed;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:10}
+#ui button{padding:12px 16px;font-size:16px;border:none;border-radius:8px;opacity:0.85}
+#hint{position:fixed;top:10px;left:50%;transform:translateX(-50%);color:white;font-family:Arial}
 </style>
 </head>
 <body>
-<h2>Mini Minecraft 3D (Créatif)</h2>
-<p>ZQSD / WASD = bouger | Espace = sauter | Clic = placer</p>
-
+<div id="hint">📱 Mobile : boutons | 👆 Tap = placer | Appui long = casser</div>
 <div id="ui">
-  <div class="block selected" data-color="#4CAF50" style="background:#4CAF50"></div>
-  <div class="block" data-color="#795548" style="background:#795548"></div>
-  <div class="block" data-color="#9E9E9E" style="background:#9E9E9E"></div>
+  <button id="left">◀</button>
+  <button id="right">▶</button>
+  <button id="forward">▲</button>
+  <button id="back">▼</button>
+  <button id="jump">⤒</button>
 </div>
 
-<canvas id="game" width="900" height="500"></canvas>
-
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
-const canvas=document.getElementById('game');
-const ctx=canvas.getContext('2d');
+// SCÈNE
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x87ceeb);
 
-const TILE=32;
-const MAP=20;
+// CAMÉRA (vue Minecraft)
+const camera=new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,1000);
+camera.position.set(0,2,5);
 
-let currentColor='#4CAF50';
-document.querySelectorAll('.block').forEach(b=>{
-  b.onclick=()=>{
-    document.querySelectorAll('.block').forEach(x=>x.classList.remove('selected'));
-    b.classList.add('selected');
-    currentColor=b.dataset.color;
-  }
-});
+// RENDERER
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(window.innerWidth,window.innerHeight);
+document.body.appendChild(renderer.domElement);
 
-// Monde 3D simple (x,y,z)
-let world=[];
-for(let x=0;x<MAP;x++){
-  world[x]=[];
-  for(let y=0;y<MAP;y++){
-    world[x][y]=[];
+// LUMIÈRE
+scene.add(new THREE.AmbientLight(0xffffff,0.6));
+const sun=new THREE.DirectionalLight(0xffffff,0.6);
+sun.position.set(10,20,10);
+scene.add(sun);
+
+// BLOCS
+const blockSize=1;
+const blocks={};
+const geometries={
+  grass:new THREE.BoxGeometry(1,1,1),
+};
+const materials={
+  grass:new THREE.MeshLambertMaterial({color:0x4CAF50})
+};
+
+function key(x,y,z){return `${x},${y},${z}`}
+
+function addBlock(x,y,z,type='grass'){
+  const mesh=new THREE.Mesh(geometries[type],materials[type]);
+  mesh.position.set(x,y,z);
+  scene.add(mesh);
+  blocks[key(x,y,z)]=mesh;
+}
+
+function removeBlock(x,y,z){
+  const k=key(x,y,z);
+  if(blocks[k]){
+    scene.remove(blocks[k]);
+    delete blocks[k];
   }
 }
 
-// Joueur
-const player={x:10,y:10,z:1,vz:0};
-const gravity=0.08;
+// SOL
+for(let x=-10;x<=10;x++){
+  for(let z=-10;z<=10;z++){
+    addBlock(x,0,z);
+  }
+}
 
+// JOUEUR
+const player={pos:new THREE.Vector3(0,2,5),vel:new THREE.Vector3(),onGround:false};
+const speed=0.08;
+const gravity=0.01;
+
+// CONTRÔLES
 const keys={};
-document.addEventListener('keydown',e=>keys[e.key.toLowerCase()]=true);
-document.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+function bind(id,key){
+  const b=document.getElementById(id);
+  b.ontouchstart=()=>keys[key]=true;
+  b.ontouchend=()=>keys[key]=false;
+}
+bind('left','a');bind('right','d');bind('forward','w');bind('back','s');bind('jump',' ');
 
-canvas.addEventListener('click',()=>{
-  const bx=Math.floor(player.x);
-  const by=Math.floor(player.y);
-  const bz=Math.floor(player.z);
-  world[bx][by][bz]=currentColor;
+// RAYCAST (placer / casser)
+const raycaster=new THREE.Raycaster();
+const touch=new THREE.Vector2();
+let pressTime=0;
+
+window.addEventListener('touchstart',e=>{
+  pressTime=Date.now();
+});
+
+window.addEventListener('touchend',e=>{
+  touch.x=0; touch.y=0;
+  raycaster.setFromCamera(touch,camera);
+  const hits=raycaster.intersectObjects(Object.values(blocks));
+  if(hits.length){
+    const p=hits[0].object.position;
+    if(Date.now()-pressTime>400){
+      removeBlock(p.x,p.y,p.z);
+    }else{
+      addBlock(p.x,p.y+1,p.z);
+    }
+  }
 });
 
 function update(){
-  let speed=0.08;
-  if(keys['w']||keys['z']) player.y-=speed;
-  if(keys['s']) player.y+=speed;
-  if(keys['a']||keys['q']) player.x-=speed;
-  if(keys['d']) player.x+=speed;
+  if(keys['w']) player.vel.z=-speed;
+  if(keys['s']) player.vel.z=speed;
+  if(keys['a']) player.vel.x=-speed;
+  if(keys['d']) player.vel.x=speed;
 
-  // gravité
-  player.vz-=gravity;
-  player.z+=player.vz;
+  player.vel.y-=gravity;
 
-  // collision sol
-  const bx=Math.floor(player.x);
-  const by=Math.floor(player.y);
-  const below=Math.floor(player.z-0.1);
-  if(below>=0 && world[bx]?.[by]?.[below]){
-    player.z=below+1;
-    player.vz=0;
+  if(keys[' ']&&player.onGround){
+    player.vel.y=0.25;
+    player.onGround=false;
   }
 
-  if(player.z<1){player.z=1;player.vz=0;}
+  player.pos.add(player.vel);
 
-  if(keys[' ']){
-    if(player.vz===0) player.vz=0.6;
-  }
+  // sol collision simple
+  if(player.pos.y<1.8){player.pos.y=1.8;player.vel.y=0;player.onGround=true}
+
+  player.vel.multiplyScalar(0.9);
+  camera.position.copy(player.pos);
 }
 
-function iso(x,y,z){
-  return{
-    x:(x-y)*TILE+canvas.width/2,
-    y:(x+y)*TILE/2 - z*TILE + 150
-  }
-}
-
-function draw(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  // blocs
-  for(let z=0;z<6;z++){
-    for(let x=0;x<MAP;x++){
-      for(let y=0;y<MAP;y++){
-        if(world[x][y][z]){
-          const p=iso(x,y,z);
-          ctx.fillStyle=world[x][y][z];
-          ctx.fillRect(p.x,p.y,TILE,TILE);
-        }
-      }
-    }
-  }
-
-  // joueur
-  const p=iso(player.x,player.y,player.z);
-  ctx.fillStyle='red';
-  ctx.fillRect(p.x,p.y,16,24);
-}
-
-function loop(){update();draw();requestAnimationFrame(loop)}
+function loop(){update();renderer.render(scene,camera);requestAnimationFrame(loop)}
 loop();
+
+window.onresize=()=>{
+  camera.aspect=window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth,window.innerHeight);
+}
 </script>
 </body>
 </html>
