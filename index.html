@@ -119,17 +119,28 @@ renderer.domElement.addEventListener('touchend',e=>{
 
 // ===== BOUCLE =====
 function loop(){
+ // déplacement horizontal
  player.x+=Math.sin(yaw)*moveForward*0.15;
  player.z+=Math.cos(yaw)*moveForward*0.15;
- player.vy-=0.02; // gravité plus douce
+
+ // gravité + saut
+ player.vy-=0.02;
  player.y+=player.vy;
- if(player.y<1.8) // atterrissage smooth{player.y=1.8;player.vy=0;player.onGround=true;}else player.onGround=false;
+
+ // SOL BLOQUÉ (ANTI-CHUTE DÉFINITIVE)
+ if(player.y<=1.8){
+  player.y=1.8;
+  player.vy=0;
+  player.onGround=true;
+ }
+
+ // caméra COLLÉE AU JOUEUR
  camera.position.set(player.x,player.y,player.z);
  camera.rotation.order='YXZ';
  camera.rotation.y=yaw;
  camera.rotation.x=pitch;
+
  renderer.render(scene,camera);
- camera.position.lerp(new THREE.Vector3(player.x,player.y,player.z),0.25);
  requestAnimationFrame(loop);
 }
 loop();
@@ -137,3 +148,4 @@ window.onresize=()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectio
 </script>
 </body>
 </html>
+
