@@ -2,61 +2,23 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Mini Minecraft Mobile Stable</title>
+<title>Mini Minecraft 3D Mobile – Stable</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-
 <style>
-body{margin:0;overflow:hidden;background:black}
+body{margin:0;overflow:hidden;background:black;font-family:Arial}
 canvas{display:block}
-
-/* Crosshair */
-#crosshair{
- position:fixed;left:50%;top:50%;
- width:16px;height:16px;
- transform:translate(-50%,-50%);
- pointer-events:none;z-index:20
-}
-#crosshair:before,#crosshair:after{
- content:'';position:absolute;background:white
-}
+#crosshair{position:fixed;left:50%;top:50%;width:16px;height:16px;transform:translate(-50%,-50%);pointer-events:none;z-index:20}
+#crosshair:before,#crosshair:after{content:'';position:absolute;background:white}
 #crosshair:before{left:7px;top:0;width:2px;height:16px}
 #crosshair:after{top:7px;left:0;width:16px;height:2px}
-
-/* Joystick */
-#joystick{
- position:fixed;left:20px;bottom:60px;
- width:120px;height:120px;
- background:rgba(255,255,255,0.15);
- border-radius:50%;z-index:10
-}
-#stick{
- position:absolute;left:40px;top:40px;
- width:40px;height:40px;
- background:rgba(255,255,255,0.6);
- border-radius:50%
-}
-
-/* Jump */
-#jump{
- position:fixed;right:30px;bottom:80px;
- width:70px;height:70px;
- border-radius:50%;
- border:none;font-size:28px;
- background:rgba(255,255,255,0.7);
- z-index:10
-}
-
-/* Hotbar */
-#hotbar{
- position:fixed;bottom:10px;left:50%;
- transform:translateX(-50%);
- display:flex;gap:6px;z-index:10
-}
-.slot{width:42px;height:42px;border:2px solid white}
-.selected{border:3px solid yellow}
+#joystick{position:fixed;left:20px;bottom:60px;width:120px;height:120px;background:rgba(255,255,255,0.15);border-radius:50%;z-index:10}
+#stick{position:absolute;left:40px;top:40px;width:40px;height:40px;background:rgba(255,255,255,0.6);border-radius:50%}
+#jump{position:fixed;right:30px;bottom:80px;width:70px;height:70px;border-radius:50%;border:none;font-size:28px;background:rgba(255,255,255,0.7);z-index:10}
+#hotbar{position:fixed;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:10}
+.slot{width:42px;height:42px;border:2px solid rgba(255,255,255,0.6)}
+.selected{border:3px solid white}
 </style>
 </head>
-
 <body>
 <div id="joystick"><div id="stick"></div></div>
 <button id="jump">⤒</button>
@@ -65,159 +27,112 @@ canvas{display:block}
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
-/* ================== BLOCS ================== */
-const BLOCKS={
- grass:0x4CAF50,
- stone:0x9E9E9E,
- wood:0x795548,
- red:0xF44336,
- blue:0x2196F3
-};
+// ===== BLOCS =====
+const COLORS={grass:0x4CAF50,stone:0x9E9E9E,wood:0x795548,red:0xF44336,blue:0x2196F3};
 
-/* ================== INVENTAIRE ================== */
-let currentBlock='grass';
+// ===== INVENTAIRE =====
+let current='grass';
 const hotbar=document.getElementById('hotbar');
-Object.keys(BLOCKS).forEach((b,i)=>{
+Object.keys(COLORS).forEach((b,i)=>{
  const d=document.createElement('div');
  d.className='slot'+(i===0?' selected':'');
- d.style.background='#'+BLOCKS[b].toString(16);
+ d.style.background='#'+COLORS[b].toString(16);
  d.onclick=()=>{
   document.querySelectorAll('.slot').forEach(s=>s.classList.remove('selected'));
   d.classList.add('selected');
-  currentBlock=b;
+  current=b;
  };
  hotbar.appendChild(d);
 });
 
-/* ================== SCÈNE ================== */
+// ===== SCENE =====
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(0x87ceeb);
-
 const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.1,1000);
 const renderer=new THREE.WebGLRenderer({antialias:true});
 renderer.setSize(innerWidth,innerHeight);
 document.body.appendChild(renderer.domElement);
-
 scene.add(new THREE.AmbientLight(0xffffff,0.8));
 const sun=new THREE.DirectionalLight(0xffffff,0.6);
 sun.position.set(10,20,10);
 scene.add(sun);
 
-/* ================== BLOCS ================== */
+// ===== BLOCS =====
 const geo=new THREE.BoxGeometry(1,1,1);
 const mats={};
-for(let b in BLOCKS){
- mats[b]=new THREE.MeshLambertMaterial({color:BLOCKS[b]});
-}
-
+for(let b in COLORS){mats[b]=new THREE.MeshLambertMaterial({color:COLORS[b]});}
 const blocks=[];
-function addBlock(x,y,z,type){
- const m=new THREE.Mesh(geo,mats[type]);
+function addBlock(x,y,z,t){
+ const m=new THREE.Mesh(geo,mats[t]);
  m.position.set(x,y,z);
  scene.add(m);
  blocks.push(m);
 }
 
-/* Sol */
-for(let x=-20;x<=20;x++){
- for(let z=-20;z<=20;z++){
-  addBlock(x,0,z,'grass');
- }
-}
+for(let x=-20;x<=20;x++)for(let z=-20;z<=20;z++)addBlock(x,0,z,'grass');
 
-/* ================== JOUEUR ================== */
+// ===== JOUEUR =====
 const player={x:0,y:2,z:5,vy:0,onGround:false};
 let yaw=0,pitch=0;
 let moveForward=0;
 
-/* ================== JOYSTICK ================== */
+// ===== JOYSTICK (INVERSE) =====
 const joy=document.getElementById('joystick');
 const stick=document.getElementById('stick');
-
 joy.ontouchmove=e=>{
  const r=joy.getBoundingClientRect();
  const t=e.touches[0];
  let dy=t.clientY-(r.top+r.height/2);
  dy=Math.max(-40,Math.min(40,dy));
  stick.style.top=40+dy+'px';
- moveForward=-dy/40;
+ moveForward=dy/40; // SENS INVERSE
 };
-joy.ontouchend=()=>{
- moveForward=0;
- stick.style.top='40px';
-};
+joy.ontouchend=()=>{moveForward=0;stick.style.top='40px'};
 
-/* ================== SAUT ================== */
+// ===== SAUT =====
 document.getElementById('jump').ontouchstart=e=>{
  e.preventDefault();
- if(player.onGround){
-  player.vy=0.35;
-  player.onGround=false;
- }
+ if(player.onGround){player.vy=0.35;player.onGround=false;}
 };
 
-/* ================== CAMÉRA + PLACEMENT ================== */
+// ===== CAMERA + PLACEMENT =====
 const ray=new THREE.Raycaster();
 let look=false,lx=0,ly=0;
-
-renderer.domElement.addEventListener('touchstart',e=>{
- look=true;
- lx=e.touches[0].clientX;
- ly=e.touches[0].clientY;
-});
-
+renderer.domElement.addEventListener('touchstart',e=>{look=true;lx=e.touches[0].clientX;ly=e.touches[0].clientY});
 renderer.domElement.addEventListener('touchmove',e=>{
  if(!look)return;
  yaw-=(e.touches[0].clientX-lx)*0.003;
  pitch-=(e.touches[0].clientY-ly)*0.003;
  pitch=Math.max(-1.2,Math.min(1.2,pitch));
- lx=e.touches[0].clientX;
- ly=e.touches[0].clientY;
+ lx=e.touches[0].clientX;ly=e.touches[0].clientY;
 });
-
 renderer.domElement.addEventListener('touchend',e=>{
  look=false;
  const t=e.changedTouches[0];
- const cx=innerWidth/2, cy=innerHeight/2;
+ const cx=innerWidth/2,cy=innerHeight/2;
  if(Math.abs(t.clientX-cx)<30 && Math.abs(t.clientY-cy)<30){
   ray.setFromCamera({x:0,y:0},camera);
   const hit=ray.intersectObjects(blocks);
-  if(hit.length){
-   const p=hit[0].object.position;
-   addBlock(p.x,p.y+1,p.z,currentBlock);
-  }
+  if(hit.length){const p=hit[0].object.position;addBlock(p.x,p.y+1,p.z,current);}
  }
 });
 
-/* ================== BOUCLE ================== */
+// ===== BOUCLE =====
 function loop(){
  player.x+=Math.sin(yaw)*moveForward*0.15;
  player.z+=Math.cos(yaw)*moveForward*0.15;
-
- player.vy-=0.025;
+ player.vy-=0.03;
  player.y+=player.vy;
-
- if(player.y<1.8){
-  player.y=1.8;
-  player.vy=0;
-  player.onGround=true;
- }
-
+ if(player.y<1.8){player.y=1.8;player.vy=0;player.onGround=true;}else player.onGround=false;
  camera.position.set(player.x,player.y,player.z);
  camera.rotation.order='YXZ';
  camera.rotation.y=yaw;
  camera.rotation.x=pitch;
-
  renderer.render(scene,camera);
  requestAnimationFrame(loop);
 }
 loop();
-
-window.onresize=()=>{
- camera.aspect=innerWidth/innerHeight;
- camera.updateProjectionMatrix();
- renderer.setSize(innerWidth,innerHeight);
-};
+window.onresize=()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)};
 </script>
 </body>
 </html>
