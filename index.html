@@ -48,17 +48,17 @@ Object.keys(COLORS).forEach((b,i)=>{
 // ===== SCENE =====
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(0x87ceeb);
-const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.1,1000);
+const camera=new THREE.PerspectiveCamera(90,innerWidth/innerHeight,0.1,1000);
 const renderer=new THREE.WebGLRenderer({antialias:true});
 renderer.setSize(innerWidth,innerHeight);
 document.body.appendChild(renderer.domElement);
-scene.add(new THREE.AmbientLight(0xffffff,0.8));
+scene.add(new THREE.AmbientLight(0xffffff,0.9));
 const sun=new THREE.DirectionalLight(0xffffff,0.6);
 sun.position.set(10,20,10);
 scene.add(sun);
 
 // ===== BLOCS =====
-const geo=new THREE.BoxGeometry(1,1,1);
+const geo=new THREE.BoxGeometry(1,1,1,2,2,2);
 const mats={};
 for(let b in COLORS){mats[b]=new THREE.MeshLambertMaterial({color:COLORS[b]});}
 const blocks=[];
@@ -121,14 +121,15 @@ renderer.domElement.addEventListener('touchend',e=>{
 function loop(){
  player.x+=Math.sin(yaw)*moveForward*0.15;
  player.z+=Math.cos(yaw)*moveForward*0.15;
- player.vy-=0.03;
+ player.vy-=0.02; // gravité plus douce
  player.y+=player.vy;
- if(player.y<1.8){player.y=1.8;player.vy=0;player.onGround=true;}else player.onGround=false;
+ if(player.y<1.8) // atterrissage smooth{player.y=1.8;player.vy=0;player.onGround=true;}else player.onGround=false;
  camera.position.set(player.x,player.y,player.z);
  camera.rotation.order='YXZ';
  camera.rotation.y=yaw;
  camera.rotation.x=pitch;
  renderer.render(scene,camera);
+ camera.position.lerp(new THREE.Vector3(player.x,player.y,player.z),0.25);
  requestAnimationFrame(loop);
 }
 loop();
@@ -136,6 +137,7 @@ window.onresize=()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectio
 </script>
 </body>
 </html>
+
 
 
 
