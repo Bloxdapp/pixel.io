@@ -1,169 +1,147 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8" />
+  <title>Mini Minecraft Créatif 2D</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Endless Runner</title>
   <style>
     body {
       margin: 0;
-      background: #111;
+      background: #1e1e1e;
       color: #fff;
       font-family: Arial, sans-serif;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
-      height: 100vh;
     }
+    h1 { margin: 10px; }
     canvas {
-      background: #222;
+      background: #87ceeb; /* ciel */
       border: 2px solid #fff;
+      cursor: crosshair;
     }
-    #hint {
-      position: absolute;
-      bottom: 20px;
-      opacity: 0.7;
-      font-size: 14px;
+    #ui {
+      display: flex;
+      gap: 10px;
+      margin: 10px;
+      flex-wrap: wrap;
+      align-items: center;
     }
+    .block {
+      width: 28px;
+      height: 28px;
+      border: 2px solid #fff;
+      cursor: pointer;
+    }
+    .selected { outline: 3px solid yellow; }
+    #hint { opacity: 0.8; font-size: 14px; }
   </style>
 </head>
 <body>
-  <canvas id="game" width="800" height="300"></canvas>
-  <div id="hint">Press SPACE or click to jump</div>
+  <h1>Mini Minecraft Créatif (2D)</h1>
+
+  <div id="ui">
+    <div class="block selected" data-color="#8BC34A" style="background:#8BC34A"></div>
+    <div class="block" data-color="#795548" style="background:#795548"></div>
+    <div class="block" data-color="#9E9E9E" style="background:#9E9E9E"></div>
+    <div class="block" data-color="#03A9F4" style="background:#03A9F4"></div>
+    <div class="block" data-color="#FFEB3B" style="background:#FFEB3B"></div>
+    <button id="clear">Effacer tout</button>
+    <div id="hint">Clic gauche = placer | Clic droit = supprimer</div>
+  </div>
+
+  <canvas id="game" width="800" height="480"></canvas>
 
   <script>
     const canvas = document.getElementById('game');
     const ctx = canvas.getContext('2d');
 
-    // Player
-    const player = {
-      x: 80,
-      y: 0,
-      width: 30,
-      height: 30,
-      velocityY: 0,
-      jumpForce: 12,
-      grounded: false
-    };
+    const TILE = 32;
+    const COLS = Math.floor(canvas.width / TILE);
+    const ROWS = Math.floor(canvas.height / TILE);
 
-    const gravity = 0.6;
-    const groundY = canvas.height - 40;
+    // Monde (grille)
+    const world = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
 
-    // Obstacles
-    let obstacles = [];
-    let obstacleTimer = 0;
+    // Bloc sélectionné
+    let currentColor = '#8BC34A';
 
-    let speed = 6;
-    let score = 0;
-    let gameOver = false;
-
-    function resetGame() {
-      obstacles = [];
-      obstacleTimer = 0;
-      speed = 6;
-      score = 0;
-      gameOver = false;
-      player.y = groundY - player.height;
-      player.velocityY = 0;
-      loop();
-    }
-
-    function jump() {
-      if (player.grounded && !gameOver) {
-        player.velocityY = -player.jumpForce;
-        player.grounded = false;
-      }
-      if (gameOver) resetGame();
-    }
-
-    document.addEventListener('keydown', e => {
-      if (e.code === 'Space') jump();
+    // UI sélection
+    const blocks = document.querySelectorAll('.block');
+    blocks.forEach(b => {
+      b.addEventListener('click', () => {
+        blocks.forEach(x => x.classList.remove('selected'));
+        b.classList.add('selected');
+        currentColor = b.dataset.color;
+      });
     });
 
-    canvas.addEventListener('click', jump);
-
-    function update() {
-      // Player physics
-      player.velocityY += gravity;
-      player.y += player.velocityY;
-
-      if (player.y + player.height >= groundY) {
-        player.y = groundY - player.height;
-        player.velocityY = 0;
-        player.grounded = true;
+    document.getElementById('clear').onclick = () => {
+      for (let y = 0; y < ROWS; y++) {
+        for (let x = 0; x < COLS; x++) world[y][x] = null;
       }
+      draw();
+    };
 
-      // Obstacles
-      obstacleTimer++;
-      if (obstacleTimer > 90) {
-        obstacles.push({
-          x: canvas.width,
-          y: groundY - 30,
-          width: 20,
-          height: 30
-        });
-        obstacleTimer = 0;
+    // Désactiver menu clic droit
+    canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+    canvas.addEventListener('mousedown', e => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+      const x = Math.floor(mx / TILE);
+      const y = Math.floor(my / TILE);
+
+      if (x < 0 || y < 0 || x >= COLS || y >= ROWS) return;
+
+      if (e.button === 0) {
+        // placer
+        world[y][x] = currentColor;
+      } else if (e.button === 2) {
+        // supprimer
+        world[y][x] = null;
       }
+      draw();
+    });
 
-      obstacles.forEach(o => o.x -= speed);
-      obstacles = obstacles.filter(o => o.x + o.width > 0);
-
-      // Collision
-      obstacles.forEach(o => {
-        if (
-          player.x < o.x + o.width &&
-          player.x + player.width > o.x &&
-          player.y < o.y + o.height &&
-          player.y + player.height > o.y
-        ) {
-          gameOver = true;
-        }
-      });
-
-      if (!gameOver) {
-        score++;
-        speed += 0.0005;
+    function drawGrid() {
+      ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+      for (let x = 0; x <= COLS; x++) {
+        ctx.beginPath();
+        ctx.moveTo(x * TILE, 0);
+        ctx.lineTo(x * TILE, canvas.height);
+        ctx.stroke();
+      }
+      for (let y = 0; y <= ROWS; y++) {
+        ctx.beginPath();
+        ctx.moveTo(0, y * TILE);
+        ctx.lineTo(canvas.width, y * TILE);
+        ctx.stroke();
       }
     }
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Ground
-      ctx.fillStyle = '#555';
-      ctx.fillRect(0, groundY, canvas.width, 40);
+      // Sol
+      ctx.fillStyle = '#6D4C41';
+      ctx.fillRect(0, canvas.height - TILE * 2, canvas.width, TILE * 2);
 
-      // Player
-      ctx.fillStyle = '#4caf50';
-      ctx.fillRect(player.x, player.y, player.width, player.height);
-
-      // Obstacles
-      ctx.fillStyle = '#e53935';
-      obstacles.forEach(o => ctx.fillRect(o.x, o.y, o.width, o.height));
-
-      // Score
-      ctx.fillStyle = '#fff';
-      ctx.font = '16px Arial';
-      ctx.fillText('Score: ' + score, 10, 20);
-
-      if (gameOver) {
-        ctx.fillStyle = '#fff';
-        ctx.font = '28px Arial';
-        ctx.fillText('GAME OVER', canvas.width / 2 - 90, canvas.height / 2);
-        ctx.font = '14px Arial';
-        ctx.fillText('Press SPACE or click to restart', canvas.width / 2 - 120, canvas.height / 2 + 25);
+      // Blocs
+      for (let y = 0; y < ROWS; y++) {
+        for (let x = 0; x < COLS; x++) {
+          if (world[y][x]) {
+            ctx.fillStyle = world[y][x];
+            ctx.fillRect(x * TILE, y * TILE, TILE, TILE);
+          }
+        }
       }
+
+      drawGrid();
     }
 
-    function loop() {
-      update();
-      draw();
-      if (!gameOver) requestAnimationFrame(loop);
-    }
-
-    // Start game
-    player.y = groundY - player.height;
-    loop();
+    draw();
   </script>
 </body>
 </html>
