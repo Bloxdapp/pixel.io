@@ -5,7 +5,6 @@
 <title>3D Fishing Game</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <style>
-/* Keeping original styles, ensuring background is black */
 html,body{margin:0;padding:0;overflow:hidden;background:black;touch-action:none}
 
 /* UI */
@@ -150,9 +149,9 @@ html,body{margin:0;padding:0;overflow:hidden;background:black;touch-action:none}
 <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/controls/OrbitControls.js"></script>
 <script>
-/* ===== SCENE SETUP (MINIMALIST) ===== */
+/* ===== SCENE SETUP ===== */
 const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x87CEEB); // Light blue sky background
+scene.background=new THREE.Color(0x87CEEB); // Sky Blue Background
 
 const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.1,1000);
 const renderer=new THREE.WebGLRenderer({antialias:true});
@@ -160,32 +159,57 @@ renderer.setSize(innerWidth,innerHeight);
 renderer.setPixelRatio(devicePixelRatio);
 document.body.appendChild(renderer.domElement);
 
-// Minimal Lighting (needed for MeshStandardMaterial to show color)
+// Lighting
 scene.add(new THREE.AmbientLight(0xffffff,.7));
 const sun=new THREE.DirectionalLight(0xffffff,1);
 sun.position.set(10,20,10);
 sun.castShadow=true;
 scene.add(sun);
 
-/* 🟦 WATER (Simple Blue Floor) */
-// Small, low-segment plane - minimum complexity
-const waterGeo=new THREE.PlaneGeometry(100,100,1,1); 
+/* 🌊 WATER / BLUE FLOOR */
+// Segmented plane for wave animation
+const waterGeo=new THREE.PlaneGeometry(200,200,50,50); 
 const waterMat=new THREE.MeshStandardMaterial({
-  color:0x1e90ff, // Blue floor color
+  color:0x1e90ff, // Blue color
+  roughness:0.3,
+  metalness:0.1,
   side:THREE.DoubleSide
 });
 const water=new THREE.Mesh(waterGeo,waterMat);
-water.rotation.x=-Math.PI/2; // Lay flat on the XZ plane
-water.position.y=0; // Set at height 0
+water.rotation.x=-Math.PI/2;
+water.position.y=0; // The ground level
 scene.add(water);
 
-/* 🏝️ ISLAND & TREES - REMOVED FOR MAX SIMPLICITY */
-// Original geometry for reference if you want to add it back:
-// const islandGeo=new THREE.CylinderGeometry(18,22,2,64);
-// const islandMat=new THREE.MeshStandardMaterial({color:0x2e8b57, roughness:0.8, metalness:0.1});
-// const island=new THREE.Mesh(islandGeo,islandMat);
-// island.position.set(0,1,0);
-// scene.add(island);
+/* 🏝️ ISLAND */
+const islandGeo=new THREE.CylinderGeometry(18,22,2,64);
+const islandMat=new THREE.MeshStandardMaterial({color:0x2e8b57, roughness:0.8, metalness:0.1});
+const island=new THREE.Mesh(islandGeo,islandMat);
+island.position.set(0,1,0); // Island sits centered above the floor
+scene.add(island);
+
+/* 🌲 TREES */
+function addTree(x,z){
+  // trunk
+  const trunkGeo=new THREE.CylinderGeometry(0.3,0.5,3,12);
+  const trunkMat=new THREE.MeshStandardMaterial({color:0x8b4513});
+  const trunk=new THREE.Mesh(trunkGeo,trunkMat);
+  trunk.position.set(x,1.5,z);
+  trunk.castShadow=true;
+  scene.add(trunk);
+
+  // layered leaves
+  for(let i=0;i<3;i++){
+    const leavesGeo=new THREE.ConeGeometry(1.5-i*0.3,1.5,8);
+    const leavesMat=new THREE.MeshStandardMaterial({color:0x228b22});
+    const leaves=new THREE.Mesh(leavesGeo,leavesMat);
+    leaves.position.set(x,3+i*0.5,z);
+    leaves.castShadow=true;
+    scene.add(leaves);
+  }
+}
+for(let i=0;i<6;i++){
+ addTree(Math.random()*12-6,Math.random()*12-6);
+}
 
 /* ORB (Shop trigger) */
 const orb=new THREE.Mesh(
@@ -196,18 +220,17 @@ const orb=new THREE.Mesh(
   emissiveIntensity:0.7
  })
 );
-orb.position.set(3,3,3); // Positioned clearly above the floor
+orb.position.set(3,3,3);
 scene.add(orb);
 
 /* PLAYER */
 const player=new THREE.Object3D();
 scene.add(player);
-// Set player to start at Y=10 and look slightly down, guaranteeing the floor is visible
-player.position.set(0, 10, 0); 
+player.position.set(0,3,0); // Player starting position
 player.add(camera);
 
 let velocityY=0,grounded=true;
-let yaw=0,pitch=0.1; // Set pitch to 0.1 radians to make player look slightly down at the floor
+let yaw=0,pitch=0;
 
 /* CAMERA LOOK */
 let looking=false,lastX=0,lastY=0;
@@ -504,14 +527,21 @@ function animate(){
 
  velocityY-=.01;
  player.position.y+=velocityY;
- // Changed grounding height to 10 for visibility.
- if(player.position.y<=10){player.position.y=10;velocityY=0;grounded=true;}
+ // Grounding height logic
+ if(player.position.y<=3){player.position.y=3;velocityY=0;grounded=true;}
 
- // NO WATER ANIMATION - Keep water flat
-//  for(let i=0;i<water.geometry.attributes.position.count;i++){
-//    water.geometry.attributes.position.setY(i,Math.sin(i/5 + performance.now()*0.002)*0.1);
-//  }
-//  water.geometry.attributes.position.needsUpdate=true;
+ if(holding&&!fishing){
+  holdTime+=.016;
+  if(holdTime>=2){startFishing();holding=false;}
+ }
+
+ // 🌊 Water Animation
+ const positions = water.geometry.attributes.position;
+ for(let i=0;i<positions.count;i++){
+   // Apply simple sine wave to Y coordinate
+   positions.setY(i,Math.sin(i/5 + performance.now()*0.002)*0.1);
+ }
+ positions.needsUpdate=true;
 
  renderer.render(scene,camera);
 }
