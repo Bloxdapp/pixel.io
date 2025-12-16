@@ -165,10 +165,10 @@ sun.position.set(10,20,10);
 sun.castShadow=true;
 scene.add(sun);
 
-/* WATER (Ocean Mod: Use Fog and larger plane) */
-const waterGeo=new THREE.PlaneGeometry(1000,1000,50,50); // Increased size to 1000x1000
+/* WATER (Big Blue Ground Plane - Simple Ocean) */
+const waterGeo=new THREE.PlaneGeometry(1000,1000,50,50); // Larger plane
 const waterMat=new THREE.MeshStandardMaterial({
-  color:0x1e90ff, // Blue color for the ground/surface
+  color:0x1e90ff, // Blue ocean color
   roughness:0.3,
   metalness:0.1,
   side:THREE.DoubleSide
@@ -181,38 +181,20 @@ scene.add(water);
 // Add Fog to blend the water into the sky color at the horizon
 scene.fog = new THREE.Fog(0x87CEEB, 150, 400); 
 
-/* ISLAND */
-const islandGeo=new THREE.CylinderGeometry(18,22,2,64);
-const islandMat=new THREE.MeshStandardMaterial({color:0x2e8b57, roughness:0.8, metalness:0.1});
+
+/* ISLAND (Small Green Cube - For Diagnostics) */
+// Replacing the complex cylinder island with a simple cube to ensure visibility.
+const islandGeo=new THREE.BoxGeometry(5, 5, 5); // Simple cube
+const islandMat=new THREE.MeshStandardMaterial({color:0x2e8b57});
 const island=new THREE.Mesh(islandGeo,islandMat);
-island.position.set(0,1,0);
+island.position.set(0,2.5,0); // Lifted half its height
 scene.add(island);
 
-/* TREES */
-function addTree(x,z){
-  // trunk
-  const trunkGeo=new THREE.CylinderGeometry(0.3,0.5,3,12);
-  const trunkMat=new THREE.MeshStandardMaterial({color:0x8b4513});
-  const trunk=new THREE.Mesh(trunkGeo,trunkMat);
-  trunk.position.set(x,1.5,z);
-  trunk.castShadow=true;
-  scene.add(trunk);
+/* TREES (Removed for initial debug) */
+// function addTree(x,z){ ... }
+// for(let i=0;i<6;i++){ ... }
 
-  // layered leaves
-  for(let i=0;i<3;i++){
-    const leavesGeo=new THREE.ConeGeometry(1.5-i*0.3,1.5,8);
-    const leavesMat=new THREE.MeshStandardMaterial({color:0x228b22});
-    const leaves=new THREE.Mesh(leavesGeo,leavesMat);
-    leaves.position.set(x,3+i*0.5,z);
-    leaves.castShadow=true;
-    scene.add(leaves);
-  }
-}
-for(let i=0;i<6;i++){
- addTree(Math.random()*12-6,Math.random()*12-6);
-}
-
-/* ORB */
+/* ORB (Still present, ensure it's above ground) */
 const orb=new THREE.Mesh(
  new THREE.SphereGeometry(0.4,16,16),
  new THREE.MeshStandardMaterial({
@@ -221,13 +203,13 @@ const orb=new THREE.Mesh(
   emissiveIntensity:0.7
  })
 );
-orb.position.set(3,1.8,3);
+orb.position.set(3,5,3); // Lifted higher
 scene.add(orb);
 
 /* PLAYER */
 const player=new THREE.Object3D();
 scene.add(player);
-player.position.set(0,3,0);
+player.position.set(0,7,0); // Lifted player higher to see the ground
 player.add(camera);
 
 let velocityY=0,grounded=true;
@@ -527,8 +509,9 @@ function animate(){
  player.position.add(r.multiplyScalar(moveX*.15));
 
  velocityY-=.01;
+ // Only apply gravity down to 5 units (where the cube island is)
  player.position.y+=velocityY;
- if(player.position.y<=3){player.position.y=3;velocityY=0;grounded=true;}
+ if(player.position.y<=7){player.position.y=7;velocityY=0;grounded=true;}
 
  if(holding&&!fishing){
   holdTime+=.016;
