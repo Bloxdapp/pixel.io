@@ -114,8 +114,8 @@ html,body{margin:0;padding:0;overflow:hidden;background:black;touch-action:none}
  🎣 <b>Fishing</b><br>
  • Equip Rod from inventory<br>
  • Hold screen 2 seconds to cast<br>
- • Wait for fish<br>
- • Tap fast to catch it<br><br>
+ • Stop casting bar in target<br>
+ • Tap repeatedly to reel in fish<br><br>
 
  🐟 <b>Fish Chances</b><br>
  • Clownfish – ~25%<br>
@@ -271,8 +271,6 @@ const prices={Clownfish:5,Tuna:10,Shark:25,Pufferfish:25,SeaTurtle:50,MantaRay:5
 const inventory=["Rod","","","","","","","",""];
 let selected=0;
 const inv=document.getElementById("inventory");
-let lastTap=0;
-let preview=null;
 
 function parseStack(item){
  if(!item)return{name:"",count:0};
@@ -343,23 +341,18 @@ buyBait.onclick=()=>{
 };
 
 /* ===== FISCH-STYLE FISHING MINIGAME ===== */
-let holding=false, holdTime=0, fishing=false;
-let fishBar=null, fishBarFill=null, fishTarget=null, barDir=1;
+let holding=false, holdTime=0, fishing=false, castBar=null, reelBar=null;
+let currentFish=null, castDir=1, castPower=0, reelProgress=0, reelDir=1;
 
-function randomFish() {
-    const r=Math.random();
-    let fish="";
-    if(r<1/50) fish="Megalodon";
-    else if(r<1/25) fish="MantaRay";
-    else if(r<1/5) fish="SeaTurtle";
-    else if(r<1/3) fish="Pufferfish";
-    else if(r<0.58) fish="Tuna";
-    else if(r<0.83) fish="Clownfish";
-    else fish="Shark";
-    if(inventory[selected]==="Sun Rod"){
-        if(Math.random()<0.5) return fish;
-    }
-    return fish;
+function randomFish(){
+ const r=Math.random();
+ if(r<1/50)return "Megalodon";
+ if(r<1/25)return "MantaRay";
+ if(r<1/5)return "SeaTurtle";
+ if(r<1/3)return "Pufferfish";
+ if(r<0.58)return "Tuna";
+ if(r<0.83)return "Clownfish";
+ return "Shark";
 }
 
 function addItem(f){
@@ -373,103 +366,127 @@ function addItem(f){
  alert("Inventory full!");
 }
 
-function createFishBar(fish){
-    fishBar=document.createElement("div");
-    fishBar.style.position="fixed";
-    fishBar.style.left="50%";
-    fishBar.style.bottom="50%";
-    fishBar.style.transform="translate(-50%,50%)";
-    fishBar.style.width="250px";
-    fishBar.style.height="30px";
-    fishBar.style.background="rgba(255,255,255,0.2)";
-    fishBar.style.border="2px solid white";
-    fishBar.style.borderRadius="6px";
-    fishBar.style.zIndex="30";
-    document.body.appendChild(fishBar);
+function createCastBar(){
+ castBar=document.createElement("div");
+ castBar.style.position="fixed";
+ castBar.style.left="50%";
+ castBar.style.bottom="60%";
+ castBar.style.transform="translate(-50%,50%)";
+ castBar.style.width="300px";
+ castBar.style.height="30px";
+ castBar.style.background="rgba(255,255,255,0.2)";
+ castBar.style.border="2px solid white";
+ castBar.style.borderRadius="6px";
+ castBar.style.zIndex="40";
+ document.body.appendChild(castBar);
 
-    fishBarFill=document.createElement("div");
-    fishBarFill.style.height="100%";
-    fishBarFill.style.width="0%";
-    fishBarFill.style.background="lime";
-    fishBarFill.style.borderRadius="4px";
-    fishBar.appendChild(fishBarFill);
-
-    fishTarget=document.createElement("div");
-    fishTarget.style.position="absolute";
-    fishTarget.style.height="100%";
-    fishTarget.style.width="50px";
-    fishTarget.style.left=Math.random()*200+"px";
-    fishTarget.style.background="rgba(255,0,0,0.5)";
-    fishBar.appendChild(fishTarget);
-
-    fishBar.dataset.fish=fish;
+ let fill=document.createElement("div");
+ fill.style.height="100%";
+ fill.style.width="0%";
+ fill.style.background="lime";
+ fill.style.borderRadius="4px";
+ castBar.appendChild(fill);
+ castBar.fill=fill;
 }
 
-function removeFishBar(){
-    if(fishBar){document.body.removeChild(fishBar);}
-    fishBar=fishBarFill=fishTarget=null;
-    fishing=false;
+function removeCastBar(){if(castBar){document.body.removeChild(castBar); castBar=null;}}
+function createReelBar(fish){
+ reelBar=document.createElement("div");
+ reelBar.style.position="fixed";
+ reelBar.style.left="50%";
+ reelBar.style.bottom="50%";
+ reelBar.style.transform="translate(-50%,50%)";
+ reelBar.style.width="300px";
+ reelBar.style.height="30px";
+ reelBar.style.background="rgba(255,255,255,0.2)";
+ reelBar.style.border="2px solid white";
+ reelBar.style.borderRadius="6px";
+ reelBar.style.zIndex="40";
+ document.body.appendChild(reelBar);
+
+ let fill=document.createElement("div");
+ fill.style.height="100%";
+ fill.style.width="0%";
+ fill.style.background="lime";
+ fill.style.borderRadius="4px";
+ reelBar.appendChild(fill);
+ reelBar.fill=fill;
+
+ let zone=document.createElement("div");
+ zone.style.position="absolute";
+ zone.style.height="100%";
+ let size={"Clownfish":80,"Tuna":60,"Shark":50,"Pufferfish":45,"SeaTurtle":35,"MantaRay":25,"Megalodon":15}[fish];
+ zone.style.width=size+"px";
+ zone.style.left=Math.random()*(300-size)+"px";
+ zone.style.background="rgba(255,0,0,0.5)";
+ reelBar.appendChild(zone);
+
+ reelBar.zone=zone;
+ reelProgress=0; reelDir=1;
 }
+
+function removeReelBar(){if(reelBar){document.body.removeChild(reelBar); reelBar=null;}}
 
 function startFishing(){
-    fishing=true;
-    msg.style.display="block";
-    msg.textContent="Casting...";
-    setTimeout(()=>{
-        const fish=randomFish();
-        msg.textContent="Fish is biting! Tap to stop the bar!";
-        createFishBar(fish);
-        fishBarFill.style.width="0%";
-        barDir=1;
+ holding=false; holdTime=0;
+ currentFish=randomFish();
+ msg.style.display="block";
+ msg.textContent="Casting...";
 
-        function animateBar(){
-            if(!fishing) return;
-            let currentWidth=parseFloat(fishBarFill.style.width);
-            currentWidth+=barDir*2;
-            if(currentWidth>=100){currentWidth=100; barDir=-1;}
-            if(currentWidth<=0){currentWidth=0; barDir=1;}
-            fishBarFill.style.width=currentWidth+"%";
-            requestAnimationFrame(animateBar);
-        }
-        animateBar();
-    },500);
+ createCastBar(); castPower=0; castDir=1;
+ function animateCast(){
+     if(!castBar) return;
+     castPower+=castDir*1.5;
+     if(castPower>=100){castPower=100;castDir=-1;}
+     if(castPower<=0){castPower=0;castDir=1;}
+     castBar.fill.style.width=castPower+"%";
+     requestAnimationFrame(animateCast);
+ }
+ animateCast();
 }
 
-function stopFishing(){
-    if(!fishing) return;
-    const fillLeft=parseFloat(fishBarFill.style.width);
-    const targetLeft=parseFloat(fishTarget.style.left);
-    const targetWidth=parseFloat(fishTarget.style.width);
-    if(fillLeft>=targetLeft && fillLeft<=targetLeft+targetWidth){
-        msg.textContent="Caught "+fishBar.dataset.fish+"!";
-        addItem(fishBar.dataset.fish);
-    } else {
-        msg.textContent="Fish escaped!";
-    }
-    setTimeout(()=>{msg.style.display="none"; removeFishBar();},1500);
+function stopCast(){
+ if(!castBar) return;
+ removeCastBar();
+ msg.textContent="Reeling "+currentFish+"! Tap to keep bar inside red zone!";
+ createReelBar(currentFish);
+ function animateReel(){
+     if(!reelBar) return;
+     reelProgress+=reelDir*1;
+     if(reelProgress>=100){reelProgress=100; reelDir=-1;}
+     if(reelProgress<=0){reelProgress=0; reelDir=1;}
+     reelBar.fill.style.width=reelProgress+"%";
+     requestAnimationFrame(animateReel);
+ }
+ animateReel();
 }
 
+function reelTap(){
+ if(!reelBar) return;
+ const barLeft=parseFloat(reelBar.fill.style.width);
+ const zoneLeft=parseFloat(reelBar.zone.style.left);
+ const zoneWidth=parseFloat(reelBar.zone.style.width);
+ if(barLeft>=zoneLeft && barLeft<=zoneLeft+zoneWidth){
+     reelProgress+=2; // success
+ } else {
+     reelProgress-=2; // fail
+ }
+ if(reelProgress>=100){msg.textContent="Caught "+currentFish+"!"; addItem(currentFish); removeReelBar(); setTimeout(()=>{msg.style.display="none"},1500);}
+ if(reelProgress<=0){msg.textContent=currentFish+" escaped!"; removeReelBar(); setTimeout(()=>{msg.style.display="none"},1500);}
+}
+
+/* TOUCH EVENTS */
 addEventListener("touchstart",(e)=>{
-    if(fishing){stopFishing(); return;}
-    if(inventory[selected]==="Rod"||inventory[selected]==="Sun Rod"){
-        if(!fishing){holding=true; holdTime=0;}
-    }
+ if(fishing){if(reelBar){reelTap();} return;}
+ if(inventory[selected]==="Rod"||inventory[selected]==="Sun Rod"){holding=true;}
 });
 
 addEventListener("touchend",()=>{
-    holding=false; holdTime=0;
+ if(holding && !fishing){holding=false; startFishing();}
+ else if(castBar){stopCast();}
 });
 
-function updateFishingHold(){
-    if(holding && !fishing){
-        holdTime+=0.016;
-        if(holdTime>=2){
-            holding=false;
-            holdTime=0;
-            startFishing();
-        }
-    }
-}
+function updateFishingHold(){if(holding && !fishing){holdTime+=0.016; if(holdTime>=2){holding=false; startFishing();}}}
 
 /* BOOK */
 book.onclick=()=>rules.style.display="block";
