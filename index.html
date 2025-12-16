@@ -272,8 +272,7 @@ const prices={Clownfish:5,Tuna:10,Shark:25,Pufferfish:25,SeaTurtle:50,MantaRay:5
 const inventory=["Rod","","","","","","","",""];
 let selected=0;
 const inv=document.getElementById("inventory");
-let lastTap=0;
-let preview=null;
+let lastTapTime=0;
 
 function parseStack(item){
  if(!item)return{name:"",count:0};
@@ -283,9 +282,30 @@ function parseStack(item){
 }
 
 function slotTap(index){
-  selected = index;       // Update selected slot
-  renderInv();            // Highlight selection
-  updateRod();            // Show or hide rod if equipped
+  const {name,count}=parseStack(inventory[index]);
+  selected = index;
+  renderInv();
+  updateRod();
+
+  // Handle fish preview and sell
+  if(!name || name==="Rod" || name==="Sun Rod" || name==="Bait") return;
+
+  const now=Date.now();
+  if(lastTapTime && now-lastTapTime<500 && selected===index){
+    // Double tap → sell
+    money += prices[name]||0;
+    document.getElementById("money").textContent="$"+money;
+    if(count>1) inventory[index]=name+"x"+(count-1);
+    else inventory[index]="";
+    renderInv();
+    lastTapTime=0;
+  }else{
+    // Single tap → preview
+    msg.style.display="block";
+    msg.textContent=name+" (tap again to sell)";
+    setTimeout(()=>{msg.style.display="none"},1000);
+    lastTapTime=now;
+  }
 }
 
 function renderInv(){
@@ -294,7 +314,7 @@ function renderInv(){
    const d=document.createElement("div");
    d.className="slot"+(i===selected?" active":"");
    d.textContent=it;
-   d.onclick=()=>slotTap(i);   // Call slotTap on click
+   d.onclick=()=>slotTap(i);
    inv.appendChild(d);
  });
 }
