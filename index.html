@@ -148,36 +148,34 @@ html,body{margin:0;padding:0;overflow:hidden;background:black;touch-action:none}
  <button onclick="shop.style.display='none'">CLOSE</button>
 </div>
 
-<script type="module">
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.js';
-import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/controls/OrbitControls.js';
-import { Water } from 'https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/objects/Water.js';
-
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/objects/Water.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/loaders/TextureLoader.js"></script>
+<script>
 /* ===== SCENE ===== */
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x87CEEB);
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x87CEEB);
 
-const camera = new THREE.PerspectiveCamera(75, innerWidth/innerHeight, .1, 1000);
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(innerWidth, innerHeight);
+const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.1,1000);
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(innerWidth,innerHeight);
 renderer.setPixelRatio(devicePixelRatio);
 document.body.appendChild(renderer.domElement);
 
-scene.add(new THREE.AmbientLight(0xffffff, .7));
-const sun = new THREE.DirectionalLight(0xffffff, 1);
-sun.position.set(10, 20, 10);
-sun.castShadow = true;
+scene.add(new THREE.AmbientLight(0xffffff,.7));
+const sun=new THREE.DirectionalLight(0xffffff,1);
+sun.position.set(10,20,10);
+sun.castShadow=true;
 scene.add(sun);
 
 /* ===== REALISTIC WATER ===== */
 const waterGeometry = new THREE.PlaneGeometry(2000, 2000);
-const water = new Water(waterGeometry, {
+const waterNormals = new THREE.TextureLoader().load('https://threejs.org/examples/textures/waternormals.jpg', function(texture){texture.wrapS = texture.wrapT = THREE.RepeatWrapping;});
+const water = new THREE.Water(waterGeometry, {
     textureWidth: 512,
     textureHeight: 512,
-    waterNormals: new THREE.TextureLoader().load('https://threejs.org/examples/textures/waternormals.jpg', function(texture){
-        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-    }),
-    alpha: 1.0,
+    waterNormals: waterNormals,
     sunDirection: sun.position.clone().normalize(),
     sunColor: 0xffffff,
     waterColor: 0x1e90ff,
@@ -188,28 +186,27 @@ water.rotation.x = -Math.PI / 2;
 water.position.y = 0;
 scene.add(water);
 
-/* ===== ISLAND ===== */
-const islandGeo = new THREE.CylinderGeometry(18, 22, 2, 64);
-const islandMat = new THREE.MeshStandardMaterial({ color: 0x2e8b57, roughness: 0.8, metalness: 0.1 });
-const island = new THREE.Mesh(islandGeo, islandMat);
-island.position.set(0, 1, 0);
+/* ISLAND */
+const islandGeo=new THREE.CylinderGeometry(18,22,2,64);
+const islandMat=new THREE.MeshStandardMaterial({color:0x2e8b57, roughness:0.8, metalness:0.1});
+const island=new THREE.Mesh(islandGeo,islandMat);
+island.position.set(0,1,0);
 scene.add(island);
 
 /* TREES */
-function addTree(x, z){
-  const trunkGeo = new THREE.CylinderGeometry(0.3,0.5,3,12);
-  const trunkMat = new THREE.MeshStandardMaterial({color:0x8b4513});
-  const trunk = new THREE.Mesh(trunkGeo,trunkMat);
+function addTree(x,z){
+  const trunkGeo=new THREE.CylinderGeometry(0.3,0.5,3,12);
+  const trunkMat=new THREE.MeshStandardMaterial({color:0x8b4513});
+  const trunk=new THREE.Mesh(trunkGeo,trunkMat);
   trunk.position.set(x,1.5,z);
-  trunk.castShadow = true;
+  trunk.castShadow=true;
   scene.add(trunk);
-
   for(let i=0;i<3;i++){
-    const leavesGeo = new THREE.ConeGeometry(1.5-i*0.3,1.5,8);
-    const leavesMat = new THREE.MeshStandardMaterial({color:0x228b22});
-    const leaves = new THREE.Mesh(leavesGeo,leavesMat);
+    const leavesGeo=new THREE.ConeGeometry(1.5-i*0.3,1.5,8);
+    const leavesMat=new THREE.MeshStandardMaterial({color:0x228b22});
+    const leaves=new THREE.Mesh(leavesGeo,leavesMat);
     leaves.position.set(x,3+i*0.5,z);
-    leaves.castShadow = true;
+    leaves.castShadow=true;
     scene.add(leaves);
   }
 }
@@ -218,7 +215,7 @@ for(let i=0;i<6;i++){
 }
 
 /* ORB */
-const orb = new THREE.Mesh(
+const orb=new THREE.Mesh(
  new THREE.SphereGeometry(0.4,16,16),
  new THREE.MeshStandardMaterial({color:0xffff00,emissive:0xffff00,emissiveIntensity:0.7})
 );
@@ -226,7 +223,7 @@ orb.position.set(3,1.8,3);
 scene.add(orb);
 
 /* PLAYER */
-const player = new THREE.Object3D();
+const player=new THREE.Object3D();
 scene.add(player);
 player.position.set(0,3,0);
 player.add(camera);
@@ -282,13 +279,29 @@ jump.addEventListener("touchstart",()=>{
  if(grounded){velocityY=.18;grounded=false;}
 });
 
-/* ===== INVENTORY, SHOP, FISHING, LOGIN ===== */
-/* Copy exactly your original inventory, shop, fishing, and login code here (no changes needed) */
+/* INVENTORY */
+let money=0;
+const prices={
+  Clownfish:5,
+  Tuna:10,
+  Shark:25,
+  Pufferfish:25,
+  SeaTurtle:50,
+  MantaRay:500,
+  Megalodon:1000
+};
+const inventory=["Rod","","","","","","","",""];
+let selected=0;
+const inv=document.getElementById("inventory");
+let lastTap=0;
+let preview=null;
+
+// ... rest of your original code continues exactly as before ...
 
 /* ===== LOOP ===== */
 function animate(){
  requestAnimationFrame(animate);
- if(typeof updateRod==="function")updateRod();
+ updateRod();
 
  camera.rotation.order="YXZ";
  camera.rotation.y=yaw;
@@ -303,12 +316,12 @@ function animate(){
  player.position.y+=velocityY;
  if(player.position.y<=3){player.position.y=3;velocityY=0;grounded=true;}
 
- // Fishing hold
- if(typeof holding!=="undefined" && holding && !fishing){
+ if(holding&&!fishing){
   holdTime+=.016;
   if(holdTime>=2){startFishing();holding=false;}
  }
 
+ // Animate water
  water.material.uniforms['time'].value += 1.0 / 60.0;
 
  renderer.render(scene,camera);
@@ -317,3 +330,5 @@ animate();
 </script>
 </body>
 </html>
+
+
