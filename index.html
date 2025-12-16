@@ -150,9 +150,6 @@ html,body{margin:0;padding:0;overflow:hidden;background:black;touch-action:none}
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/controls/OrbitControls.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/objects/Water.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/loaders/TextureLoader.js"></script>
-
 <script>
 /* ===== SCENE ===== */
 const scene=new THREE.Scene();
@@ -170,21 +167,17 @@ sun.position.set(10,20,10);
 sun.castShadow=true;
 scene.add(sun);
 
-/* ===== REALISTIC WATER ===== */
-const waterGeometry = new THREE.PlaneGeometry(2000, 2000);
-const waterNormals = new THREE.TextureLoader().load('https://threejs.org/examples/textures/waternormals.jpg', function(texture){texture.wrapS = texture.wrapT = THREE.RepeatWrapping;});
-const water = new THREE.Water(waterGeometry, {
-    textureWidth: 512,
-    textureHeight: 512,
-    waterNormals: waterNormals,
-    sunDirection: sun.position.clone().normalize(),
-    sunColor: 0xffffff,
-    waterColor: 0x1e90ff,
-    distortionScale: 3.7,
-    fog: scene.fog !== undefined
+/* WATER */
+const waterGeo=new THREE.PlaneGeometry(200,200,50,50);
+const waterMat=new THREE.MeshStandardMaterial({
+  color:0x1e90ff,
+  roughness:0.3,
+  metalness:0.1,
+  side:THREE.DoubleSide
 });
-water.rotation.x = -Math.PI / 2;
-water.position.y = 0;
+const water=new THREE.Mesh(waterGeo,waterMat);
+water.rotation.x=-Math.PI/2;
+water.position.y=0;
 scene.add(water);
 
 /* ISLAND */
@@ -395,9 +388,11 @@ addEventListener("touchstart",e=>{
 /* SHOP BUTTONS */
 buySunRod.onclick=()=>{
  if(money<1000)return alert("Not enough money");
+ // Replace Rod with Sun Rod
  for(let i=0;i<inventory.length;i++){
   if(inventory[i]==="Rod"){inventory[i]="Sun Rod"; renderInv(); money-=1000; document.getElementById("money").textContent="$"+money; return;}
  }
+ // If no Rod, add Sun Rod to empty slot
  for(let i=0;i<inventory.length;i++){
   if(inventory[i]===""){inventory[i]="Sun Rod"; money-=1000; document.getElementById("money").textContent="$"+money; renderInv(); return;}
  }
@@ -436,8 +431,9 @@ function randomFish(){
  else if(r<0.83) fish = "Clownfish";
  else fish = "Shark";
 
+ // Double chance if Sun Rod equipped
  if(inventory[selected]==="Sun Rod"){
-   if(Math.random() < 0.5) return fish;
+   if(Math.random() < 0.5) return fish; // extra 50% chance
  }
  return fish;
 }
@@ -539,7 +535,10 @@ function animate(){
  }
 
  // Animate water
- water.material.uniforms['time'].value += 1.0 / 60.0;
+ for(let i=0;i<water.geometry.attributes.position.count;i++){
+   water.geometry.attributes.position.setY(i,Math.sin(i/5 + performance.now()*0.002)*0.1);
+ }
+ water.geometry.attributes.position.needsUpdate=true;
 
  renderer.render(scene,camera);
 }
