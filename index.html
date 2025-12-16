@@ -168,7 +168,7 @@ sun.castShadow=true;
 scene.add(sun);
 
 /* OCEAN */
-const oceanGeo=new THREE.PlaneGeometry(1000,1000,100,100);
+const oceanGeo=new THREE.PlaneGeometry(2000,2000,50,50);
 const oceanMat=new THREE.MeshStandardMaterial({
   color:0x1e90ff,
   roughness:0.3,
@@ -189,7 +189,6 @@ scene.add(island);
 
 /* TREES */
 function addTree(x,z){
-  // trunk
   const trunkGeo=new THREE.CylinderGeometry(0.3,0.5,3,12);
   const trunkMat=new THREE.MeshStandardMaterial({color:0x8b4513});
   const trunk=new THREE.Mesh(trunkGeo,trunkMat);
@@ -197,7 +196,6 @@ function addTree(x,z){
   trunk.castShadow=true;
   scene.add(trunk);
 
-  // layered leaves
   for(let i=0;i<3;i++){
     const leavesGeo=new THREE.ConeGeometry(1.5-i*0.3,1.5,8);
     const leavesMat=new THREE.MeshStandardMaterial({color:0x228b22});
@@ -214,11 +212,7 @@ for(let i=0;i<6;i++){
 /* ORB */
 const orb=new THREE.Mesh(
  new THREE.SphereGeometry(0.4,16,16),
- new THREE.MeshStandardMaterial({
-  color:0xffff00,
-  emissive:0xffff00,
-  emissiveIntensity:0.7
- })
+ new THREE.MeshStandardMaterial({color:0xffff00,emissive:0xffff00,emissiveIntensity:0.7})
 );
 orb.position.set(3,1.8,3);
 scene.add(orb);
@@ -282,22 +276,13 @@ jump.addEventListener("touchstart",()=>{
 
 /* INVENTORY */
 let money=0;
-const prices={
-  Clownfish:5,
-  Tuna:10,
-  Shark:25,
-  Pufferfish:25,
-  SeaTurtle:50,
-  MantaRay:500,
-  Megalodon:1000
-};
+const prices={Clownfish:5,Tuna:10,Shark:25,Pufferfish:25,SeaTurtle:50,MantaRay:500,Megalodon:1000};
 const inventory=["Rod","","","","","","","",""];
 let selected=0;
 const inv=document.getElementById("inventory");
 let lastTap=0;
 let preview=null;
 
-// Helper: Parse item and count
 function parseStack(item){
  if(!item) return {name:"",count:0};
  const match = item.match(/^(.+)x(\d+)$/);
@@ -319,11 +304,11 @@ renderInv();
 
 function slotTap(i){
  const now=Date.now();
- const {name,count} = parseStack(inventory[i]);
+ const {name,count}=parseStack(inventory[i]);
  if(name==="Rod" || name==="Sun Rod"){selected=i;removePreview();renderInv();return;}
  if(!name) return;
  if(now-lastTap<400){
-  money += (prices[name]||0) * count;
+  money+=(prices[name]||0)*count;
   inventory[i]="";
   document.getElementById("money").textContent="$"+money;
   removePreview();
@@ -344,10 +329,8 @@ function previewFish(name){
              name==="MantaRay"?0x00ffcc:
              name==="Megalodon"?0xff0000:
              0xffffff;
- preview=new THREE.Mesh(
-  new THREE.SphereGeometry(.25,16,16),
-  new THREE.MeshStandardMaterial({color})
- );
+ preview=new THREE.Mesh(new THREE.SphereGeometry(.25,16,16),
+ new THREE.MeshStandardMaterial({color}));
  preview.position.set(0,-.2,-1);
  camera.add(preview);
 }
@@ -358,10 +341,8 @@ let rod=null;
 function updateRod(){
  if(inventory[selected]==="Rod" || inventory[selected]==="Sun Rod"){
   if(!rod){
-   rod=new THREE.Mesh(
-    new THREE.CylinderGeometry(.02,.02,1),
-    new THREE.MeshStandardMaterial({color:inventory[selected]==="Sun Rod"?0xffcc00:0x8b4513})
-   );
+   rod=new THREE.Mesh(new THREE.CylinderGeometry(.02,.02,1),
+   new THREE.MeshStandardMaterial({color:inventory[selected]==="Sun Rod"?0xffcc00:0x8b4513}));
    rod.position.set(.3,-.4,-1);
    rod.rotation.z=Math.PI/4;
    camera.add(rod);
@@ -375,7 +356,6 @@ function updateRod(){
 const raycaster=new THREE.Raycaster();
 const touchVec=new THREE.Vector2();
 const shop=document.getElementById("shop");
-
 addEventListener("touchstart",e=>{
  touchVec.x=(e.touches[0].clientX/innerWidth)*2-1;
  touchVec.y=-(e.touches[0].clientY/innerHeight)*2+1;
@@ -388,11 +368,9 @@ addEventListener("touchstart",e=>{
 /* SHOP BUTTONS */
 buySunRod.onclick=()=>{
  if(money<1000)return alert("Not enough money");
- // Replace Rod with Sun Rod
  for(let i=0;i<inventory.length;i++){
   if(inventory[i]==="Rod"){inventory[i]="Sun Rod"; renderInv(); money-=1000; document.getElementById("money").textContent="$"+money; return;}
  }
- // If no Rod, add Sun Rod to empty slot
  for(let i=0;i<inventory.length;i++){
   if(inventory[i]===""){inventory[i]="Sun Rod"; money-=1000; document.getElementById("money").textContent="$"+money; renderInv(); return;}
  }
@@ -417,35 +395,28 @@ buyBait.onclick=()=>{
 let holding=false,holdTime=0,fishing=false,taps=0;
 addEventListener("touchstart",()=>{if(inventory[selected]==="Rod" || inventory[selected]==="Sun Rod"){if(!fishing){holding=true;holdTime=0}}});
 addEventListener("touchend",()=>{holding=false;holdTime=0});
-addEventListener("touchstart",()=>{if(fishing)taps++});
+addEventListener("touchstart",()=>{if(fishing)taps++;});
 
-// Random Fish with probabilities
 function randomFish(){
  const r=Math.random();
- let fish = "";
- if(r<1/50) fish = "Megalodon";
- else if(r<1/25) fish = "MantaRay";
- else if(r<1/5) fish = "SeaTurtle";
- else if(r<1/3) fish = "Pufferfish";
- else if(r<0.58) fish = "Tuna";
- else if(r<0.83) fish = "Clownfish";
- else fish = "Shark";
-
- // Double chance if Sun Rod equipped
+ let fish="";
+ if(r<1/50) fish="Megalodon";
+ else if(r<1/25) fish="MantaRay";
+ else if(r<1/5) fish="SeaTurtle";
+ else if(r<1/3) fish="Pufferfish";
+ else if(r<0.58) fish="Tuna";
+ else if(r<0.83) fish="Clownfish";
+ else fish="Shark";
  if(inventory[selected]==="Sun Rod"){
-   if(Math.random() < 0.5) return fish; // extra 50% chance
+   if(Math.random()<0.5) return fish;
  }
  return fish;
 }
 
 function addItem(f){
  for(let i=0;i<inventory.length;i++){
-   const {name,count} = parseStack(inventory[i]);
-   if(name===f){
-     inventory[i] = name+"x"+(count+1);
-     renderInv();
-     return;
-   }
+   const {name,count}=parseStack(inventory[i]);
+   if(name===f){inventory[i]=name+"x"+(count+1);renderInv();return;}
  }
  for(let i=0;i<inventory.length;i++){
    if(inventory[i]===""){inventory[i]=f;renderInv();return;}
@@ -472,74 +443,55 @@ function startFishing(){
 /* BOOK */
 book.onclick=()=>rules.style.display="block";
 
-/* ===== LOGIN FEATURE ===== */
-const loginDiv = document.getElementById("login");
-const usernameInput = document.getElementById("username");
-const loginBtn = document.getElementById("loginBtn");
-
-let username = null;
+/* LOGIN FEATURE */
+const loginDiv=document.getElementById("login");
+const usernameInput=document.getElementById("username");
+const loginBtn=document.getElementById("loginBtn");
+let username=null;
 
 function loadPlayerData(name){
-  const data = localStorage.getItem("fishingGame_" + name);
-  if(data){
-    const parsed = JSON.parse(data);
-    money = parsed.money || 0;
-    inventory.splice(0, inventory.length, ...parsed.inventory || inventory);
-    selected = parsed.selected || 0;
-  }
-  document.getElementById("money").textContent="$"+money;
-  renderInv();
+ const data=localStorage.getItem("fishingGame_"+name);
+ if(data){
+  const parsed=JSON.parse(data);
+  money=parsed.money||0;
+  inventory.splice(0,inventory.length,...parsed.inventory||inventory);
+  selected=parsed.selected||0;
+ }
+ document.getElementById("money").textContent="$"+money;
+ renderInv();
 }
 
 function savePlayerData(){
-  if(!username) return;
-  localStorage.setItem("fishingGame_" + username, JSON.stringify({
-    money,
-    inventory,
-    selected
-  }));
+ if(!username)return;
+ localStorage.setItem("fishingGame_"+username,JSON.stringify({money,inventory,selected}));
 }
 
-loginBtn.onclick = ()=>{
-  const name = usernameInput.value.trim();
-  if(!name) return alert("Enter a username");
-  username = name;
-  loadPlayerData(username);
-  loginDiv.style.display = "none";
-  savePlayerData();
+loginBtn.onclick=()=>{
+ const name=usernameInput.value.trim();
+ if(!name)return alert("Enter a username");
+ username=name;
+ loadPlayerData(username);
+ loginDiv.style.display="none";
+ savePlayerData();
 };
 
-setInterval(savePlayerData, 5000);
+setInterval(savePlayerData,5000);
 
-/* ===== LOOP ===== */
+/* LOOP */
 function animate(){
  requestAnimationFrame(animate);
  updateRod();
-
  camera.rotation.order="YXZ";
  camera.rotation.y=yaw;
  camera.rotation.x=pitch;
-
  const f=new THREE.Vector3(Math.sin(yaw),0,Math.cos(yaw));
  const r=new THREE.Vector3(f.z,0,-f.x);
  player.position.add(f.multiplyScalar(moveZ*.15));
  player.position.add(r.multiplyScalar(moveX*.15));
-
  velocityY-=.01;
  player.position.y+=velocityY;
  if(player.position.y<=3){player.position.y=3;velocityY=0;grounded=true;}
-
- if(holding&&!fishing){
-  holdTime+=.016;
-  if(holdTime>=2){startFishing();holding=false;}
- }
-
- // Animate ocean
- for(let i=0;i<ocean.geometry.attributes.position.count;i++){
-   ocean.geometry.attributes.position.setY(i,Math.sin(i/5 + performance.now()*0.002)*0.2);
- }
- ocean.geometry.attributes.position.needsUpdate=true;
-
+ if(holding&&!fishing){holdTime+=.016;if(holdTime>=2){startFishing();holding=false;}}
  renderer.render(scene,camera);
 }
 animate();
