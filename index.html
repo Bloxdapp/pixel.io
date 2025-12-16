@@ -16,17 +16,17 @@ html, body {
 /* MOVE JOYSTICK */
 #joystick {
   position: fixed;
-  bottom: 30px;
-  left: 30px;
-  width: 120px;
-  height: 120px;
+  bottom: 120px;
+  left: 20px;
+  width: 110px;
+  height: 110px;
   background: rgba(255,255,255,0.15);
   border-radius: 50%;
 }
 #stick {
   position: absolute;
-  left: 35px;
-  top: 35px;
+  left: 30px;
+  top: 30px;
   width: 50px;
   height: 50px;
   background: white;
@@ -36,13 +36,37 @@ html, body {
 /* JUMP */
 #jump {
   position: fixed;
-  bottom: 40px;
-  right: 30px;
-  width: 90px;
-  height: 90px;
+  bottom: 120px;
+  right: 20px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   border: none;
-  font-size: 18px;
+  font-size: 16px;
+}
+
+/* INVENTORY */
+#inventory {
+  position: fixed;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+}
+.slot {
+  width: 40px;
+  height: 40px;
+  border: 2px solid white;
+  color: white;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.5);
+}
+.slot.active {
+  border-color: yellow;
 }
 
 /* MESSAGE */
@@ -52,7 +76,7 @@ html, body {
   left: 50%;
   transform: translate(-50%, -50%);
   color: white;
-  font-size: 24px;
+  font-size: 22px;
   text-shadow: 2px 2px 5px black;
   display: none;
 }
@@ -62,11 +86,13 @@ html, body {
 
 <div id="joystick"><div id="stick"></div></div>
 <button id="jump">JUMP</button>
+
+<div id="inventory"></div>
 <div id="msg"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
 <script>
-/* ===== SETUP ===== */
+/* ===== THREE SETUP ===== */
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x87CEEB);
 
@@ -112,22 +138,20 @@ let looking = false, lastX = 0, lastY = 0;
 
 /* TOUCH LOOK */
 window.addEventListener("touchstart", e=>{
-  if(e.target.id==="joystick"||e.target.id==="stick"||e.target.id==="jump") return;
+  if(e.target.closest(".slot") || e.target.id==="joystick" || e.target.id==="stick" || e.target.id==="jump") return;
   looking = true;
   lastX = e.touches[0].clientX;
   lastY = e.touches[0].clientY;
 });
-
 window.addEventListener("touchmove", e=>{
   if(!looking) return;
-  const x = e.touches[0].clientX;
-  const y = e.touches[0].clientY;
+  const x=e.touches[0].clientX;
+  const y=e.touches[0].clientY;
   yaw -= (x-lastX)*0.004;
   pitch -= (y-lastY)*0.004;
-  pitch = Math.max(-1.4, Math.min(1.4, pitch));
-  lastX = x; lastY = y;
+  pitch=Math.max(-1.4,Math.min(1.4,pitch));
+  lastX=x; lastY=y;
 });
-
 window.addEventListener("touchend", ()=>looking=false);
 
 /* MOVE JOYSTICK */
@@ -142,7 +166,6 @@ joystick.addEventListener("touchstart", ()=>{
   joyCenter.x=r.left+r.width/2;
   joyCenter.y=r.top+r.height/2;
 });
-
 window.addEventListener("touchmove", e=>{
   if(!joyActive) return;
   const t=e.touches[0];
@@ -150,38 +173,54 @@ window.addEventListener("touchmove", e=>{
   let dy=t.clientY-joyCenter.y;
   dx=Math.max(-40,Math.min(40,dx));
   dy=Math.max(-40,Math.min(40,dy));
-  stick.style.left=35+dx+"px";
-  stick.style.top=35+dy+"px";
+  stick.style.left=30+dx+"px";
+  stick.style.top=30+dy+"px";
   moveX=dx/40;
   moveZ=dy/40;
 });
-
 window.addEventListener("touchend", ()=>{
   joyActive=false;
-  stick.style.left="35px";
-  stick.style.top="35px";
+  stick.style.left="30px";
+  stick.style.top="30px";
   moveX=moveZ=0;
 });
 
 /* JUMP */
-document.getElementById("jump").addEventListener("touchstart",()=>{
+document.getElementById("jump").addEventListener("touchstart", ()=>{
   if(grounded){
     velocityY=0.18;
     grounded=false;
   }
 });
 
+/* ===== INVENTORY ===== */
+const inventory = ["Rod", "", "", "", "", "", "", "", ""];
+let selectedSlot = 0;
+const invDiv = document.getElementById("inventory");
+
+function renderInventory(){
+  invDiv.innerHTML="";
+  inventory.forEach((item,i)=>{
+    const d=document.createElement("div");
+    d.className="slot"+(i===selectedSlot?" active":"");
+    d.innerText=item||"";
+    d.addEventListener("touchstart",()=>{
+      selectedSlot=i;
+      renderInventory();
+    });
+    invDiv.appendChild(d);
+  });
+}
+renderInventory();
+
 /* ===== FISHING ===== */
-let holdTime=0;
-let holding=false;
-let fishing=false;
-let taps=0;
-let tapTimer=null;
+let holding=false, holdTime=0;
+let fishing=false, taps=0, tapTimer=null;
 const msg=document.getElementById("msg");
 
-/* HOLD TO CAST */
 window.addEventListener("touchstart", ()=>{
   if(fishing) return;
+  if(inventory[selectedSlot]!=="Rod") return;
   holding=true;
   holdTime=0;
 });
@@ -191,12 +230,11 @@ window.addEventListener("touchend", ()=>{
   holdTime=0;
 });
 
-/* TAP MINIGAME */
 window.addEventListener("touchstart", ()=>{
   if(fishing && tapTimer) taps++;
 });
 
-/* ===== LOOP ===== */
+/* LOOP */
 function animate(){
   requestAnimationFrame(animate);
 
@@ -206,7 +244,6 @@ function animate(){
 
   const forward=new THREE.Vector3(Math.sin(yaw),0,Math.cos(yaw));
   const right=new THREE.Vector3(forward.z,0,-forward.x);
-
   player.position.add(forward.multiplyScalar(moveZ*0.15));
   player.position.add(right.multiplyScalar(moveX*0.15));
 
@@ -230,7 +267,7 @@ function animate(){
 }
 animate();
 
-/* ===== FISH LOGIC ===== */
+/* FISH LOGIC */
 function startFishing(){
   fishing=true;
   msg.style.display="block";
@@ -250,11 +287,7 @@ function startMinigame(){
     if(time<=0){
       clearInterval(tapTimer);
       tapTimer=null;
-      if(taps>=10){
-        msg.innerText="You caught a Clownfish!";
-      } else {
-        msg.innerText="The Clownfish escaped!";
-      }
+      msg.innerText = taps>=10 ? "You caught a Clownfish!" : "The Clownfish escaped!";
       setTimeout(()=>{
         msg.style.display="none";
         fishing=false;
@@ -264,7 +297,7 @@ function startMinigame(){
 }
 
 /* RESIZE */
-window.addEventListener("resize",()=>{
+window.addEventListener("resize", ()=>{
   camera.aspect=window.innerWidth/window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth,window.innerHeight);
