@@ -3,29 +3,42 @@
 <head>
 <meta charset="UTF-8">
 <title>3D Fishing Game</title>
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <style>
-html,body{margin:0;overflow:hidden;background:black;touch-action:none}
+html,body{margin:0;padding:0;overflow:hidden;background:black;touch-action:none}
 
 /* UI */
-#money{position:fixed;bottom:10px;right:10px;color:white;background:rgba(0,0,0,.6);padding:6px 10px;border-radius:6px}
-#msg{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:white;font-size:22px;display:none;text-shadow:2px 2px 6px black}
-#book{position:fixed;top:10px;left:10px;font-size:28px;z-index:10;cursor:pointer}
-
-/* Rules */
+#money{
+ position:fixed;bottom:10px;right:10px;
+ color:white;font-size:18px;
+ background:rgba(0,0,0,.5);
+ padding:6px 10px;border-radius:6px
+}
+#book{
+ position:fixed;top:10px;left:10px;
+ font-size:28px;cursor:pointer;
+ z-index:10
+}
 #rules{
- position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
- background:rgba(0,0,0,.9);color:white;padding:20px;border-radius:12px;
- width:85%;max-width:420px;display:none;z-index:20
+ position:fixed;top:50%;left:50%;
+ transform:translate(-50%,-50%);
+ width:85%;max-width:420px;
+ background:rgba(0,0,0,.9);
+ color:white;padding:20px;
+ border-radius:12px;
+ display:none;
+ z-index:20
 }
-
-/* Shop */
-#shop{
- position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
- background:rgba(0,0,0,.9);color:white;padding:20px;border-radius:12px;
- display:none;z-index:30;text-align:center
+#rules button{
+ margin-top:12px;padding:6px 14px;
+ font-size:16px
 }
-#shop button{margin:6px;padding:8px 16px}
+#msg{
+ position:fixed;top:50%;left:50%;
+ transform:translate(-50%,-50%);
+ color:white;font-size:22px;
+ display:none;text-shadow:2px 2px 5px black
+}
 
 /* Controls */
 #joystick{position:fixed;bottom:120px;left:20px;width:110px;height:110px;background:rgba(255,255,255,.15);border-radius:50%}
@@ -41,29 +54,35 @@ html,body{margin:0;overflow:hidden;background:black;touch-action:none}
 <body>
 
 <div id="book">📘</div>
-<div id="money">$0</div>
-<div id="msg"></div>
 
 <div id="rules">
-<h2>Fishing Rules</h2>
-<p>
-Move with joystick<br>
-Swipe to look<br>
-Jump button<br><br>
-Equip rod → hold 2s to fish<br>
-Tap fast to catch fish<br><br>
-Tap fish once = preview<br>
-Tap fish twice = sell
-</p>
-<button onclick="rules.style.display='none'">Close</button>
+ <h2>Fishing Game Rules</h2>
+ <p>
+ 🎮 <b>Controls</b><br>
+ • Move with left joystick<br>
+ • Swipe screen to look<br>
+ • Jump with jump button<br><br>
+
+ 🎣 <b>Fishing</b><br>
+ • Equip Rod from inventory<br>
+ • Hold screen 2 seconds to cast<br>
+ • Wait for fish<br>
+ • Tap fast to catch it<br><br>
+
+ 🐟 <b>Fish Chances</b><br>
+ • Clownfish – 25%<br>
+ • Tuna – 25%<br>
+ • Shark – 50%<br><br>
+
+ 💰 <b>Selling</b><br>
+ • Tap fish once to preview<br>
+ • Tap twice to sell
+ </p>
+ <button onclick="rules.style.display='none'">CLOSE</button>
 </div>
 
-<div id="shop">
-<h3>Fisherman</h3>
-<button id="buySun">Buy Sun Rod ($100)</button><br>
-<button id="buyBait">Buy Bait ($15)</button><br>
-<button onclick="shop.style.display='none'">Close</button>
-</div>
+<div id="money">$0</div>
+<div id="msg"></div>
 
 <div id="joystick"><div id="stick"></div></div>
 <button id="jump">JUMP</button>
@@ -88,89 +107,104 @@ scene.add(sun);
 
 /* WORLD */
 const water=new THREE.Mesh(
- new THREE.BoxGeometry(300,.5,300),
+ new THREE.BoxGeometry(200,.5,200),
  new THREE.MeshLambertMaterial({color:0x1e90ff})
 );
 water.position.y=.25;
 scene.add(water);
 
 const island=new THREE.Mesh(
- new THREE.CylinderGeometry(20,26,3,32),
+ new THREE.CylinderGeometry(18,22,2,32),
  new THREE.MeshLambertMaterial({color:0x2e8b57})
 );
-island.position.y=1.5;
+island.position.set(0,1,0);
 scene.add(island);
 
-const sand=new THREE.Mesh(
- new THREE.CylinderGeometry(24,30,.8,32),
- new THREE.MeshLambertMaterial({color:0xd2b48c})
-);
-sand.position.y=.9;
-scene.add(sand);
-
 /* TREES */
-for(let i=0;i<12;i++){
- const t=new THREE.Mesh(new THREE.CylinderGeometry(.3,.4,3),new THREE.MeshLambertMaterial({color:0x8b4513}));
- const l=new THREE.Mesh(new THREE.SphereGeometry(1.6,12,12),new THREE.MeshLambertMaterial({color:0x228b22}));
- t.position.set(Math.random()*16-8,2.5,Math.random()*16-8);
- l.position.set(t.position.x,4,t.position.z);
- scene.add(t,l);
-}
+function addTree(x,z){
+ const trunk=new THREE.Mesh(
+  new THREE.CylinderGeometry(.3,.4,3),
+  new THREE.MeshLambertMaterial({color:0x8b4513})
+ );
+ trunk.position.set(x,2.5,z);
+ scene.add(trunk);
 
-/* NPC */
-const fisherman=new THREE.Group();
-const body=new THREE.Mesh(new THREE.CylinderGeometry(.4,.5,2),new THREE.MeshLambertMaterial({color:0x8b4513}));
-const head=new THREE.Mesh(new THREE.SphereGeometry(.45),new THREE.MeshLambertMaterial({color:0xffccaa}));
-body.position.y=2;
-head.position.y=3.3;
-fisherman.add(body,head);
-fisherman.position.set(4,1,4);
-scene.add(fisherman);
+ const leaves=new THREE.Mesh(
+  new THREE.SphereGeometry(1.5,12,12),
+  new THREE.MeshLambertMaterial({color:0x228b22})
+ );
+ leaves.position.set(x,4,z);
+ scene.add(leaves);
+}
+for(let i=0;i<6;i++){
+ addTree(Math.random()*12-6,Math.random()*12-6);
+}
 
 /* PLAYER */
 const player=new THREE.Object3D();
+scene.add(player);
 player.position.set(0,3,0);
 player.add(camera);
-scene.add(player);
 
-let yaw=0,pitch=0,vy=0,grounded=true;
+let velocityY=0,grounded=true;
+let yaw=0,pitch=0;
 
 /* CAMERA LOOK */
-let look=false,lx=0,ly=0;
+let looking=false,lastX=0,lastY=0;
 addEventListener("touchstart",e=>{
- if(e.target.closest(".slot")||e.target.id==="joystick"||e.target.id==="stick"||e.target.id==="jump")return;
- look=true;lx=e.touches[0].clientX;ly=e.touches[0].clientY;
+ if(e.target.closest(".slot")||e.target.id==="joystick"||e.target.id==="stick"||e.target.id==="jump"||e.target.id==="book")return;
+ looking=true;
+ lastX=e.touches[0].clientX;
+ lastY=e.touches[0].clientY;
 });
 addEventListener("touchmove",e=>{
- if(!look)return;
- yaw-=(e.touches[0].clientX-lx)*.004;
- pitch-=(e.touches[0].clientY-ly)*.004;
+ if(!looking)return;
+ yaw-=(e.touches[0].clientX-lastX)*.004;
+ pitch-=(e.touches[0].clientY-lastY)*.004;
  pitch=Math.max(-1.4,Math.min(1.4,pitch));
- lx=e.touches[0].clientX;ly=e.touches[0].clientY;
+ lastX=e.touches[0].clientX;
+ lastY=e.touches[0].clientY;
 });
-addEventListener("touchend",()=>look=false);
+addEventListener("touchend",()=>looking=false);
 
 /* MOVE */
-let mx=0,mz=0,joy=false,c={};
-joystick.ontouchstart=()=>{joy=true;const r=joystick.getBoundingClientRect();c={x:r.left+r.width/2,y:r.top+r.height/2}};
+let moveX=0,moveZ=0,joy=false,center={};
+joystick.addEventListener("touchstart",()=>{
+ joy=true;
+ const r=joystick.getBoundingClientRect();
+ center={x:r.left+r.width/2,y:r.top+r.height/2};
+});
 addEventListener("touchmove",e=>{
  if(!joy)return;
- let dx=e.touches[0].clientX-c.x,dy=e.touches[0].clientY-c.y;
- dx=Math.max(-40,Math.min(40,dx));dy=Math.max(-40,Math.min(40,dy));
- stick.style.left=30+dx+"px";stick.style.top=30+dy+"px";
- mx=dx/40;mz=dy/40;
+ let dx=e.touches[0].clientX-center.x;
+ let dy=e.touches[0].clientY-center.y;
+ dx=Math.max(-40,Math.min(40,dx));
+ dy=Math.max(-40,Math.min(40,dy));
+ stick.style.left=30+dx+"px";
+ stick.style.top=30+dy+"px";
+ moveX=dx/40;
+ moveZ=dy/40;
 });
-addEventListener("touchend",()=>{joy=false;mx=mz=0;stick.style.left="30px";stick.style.top="30px"});
+addEventListener("touchend",()=>{
+ joy=false;
+ stick.style.left="30px";
+ stick.style.top="30px";
+ moveX=moveZ=0;
+});
 
-jump.ontouchstart=()=>{if(grounded){vy=.18;grounded=false}};
+/* JUMP */
+jump.addEventListener("touchstart",()=>{
+ if(grounded){velocityY=.18;grounded=false;}
+});
 
 /* INVENTORY */
-const moneyDiv=document.getElementById("money");
 let money=0;
 const prices={Clownfish:5,Tuna:10,Shark:25};
 const inventory=["Rod","","","","","","","",""];
-let selected=0,lastTap=0,preview=null;
+let selected=0;
 const inv=document.getElementById("inventory");
+let lastTap=0;
+let preview=null;
 
 function renderInv(){
  inv.innerHTML="";
@@ -186,13 +220,14 @@ renderInv();
 
 function slotTap(i){
  const now=Date.now();
- if(inventory[i].includes("Rod")){selected=i;removePreview();renderInv();return;}
+ if(inventory[i]==="Rod"){selected=i;removePreview();renderInv();return;}
  if(inventory[i]==="")return;
  if(now-lastTap<400){
   money+=prices[inventory[i]];
   inventory[i]="";
-  moneyDiv.textContent="$"+money;
-  removePreview();renderInv();
+  document.getElementById("money").textContent="$"+money;
+  removePreview();
+  renderInv();
  }else{
   previewFish(inventory[i]);
   lastTap=now;
@@ -202,59 +237,59 @@ function slotTap(i){
 function previewFish(name){
  removePreview();
  const color=name==="Shark"?0x555555:name==="Tuna"?0xaaaaaa:0xff8800;
- preview=new THREE.Mesh(new THREE.SphereGeometry(.25,16,16),new THREE.MeshLambertMaterial({color}));
+ preview=new THREE.Mesh(
+  new THREE.SphereGeometry(.25,16,16),
+  new THREE.MeshLambertMaterial({color})
+ );
  preview.position.set(0,-.2,-1);
  camera.add(preview);
 }
 function removePreview(){if(preview){camera.remove(preview);preview=null;}}
 
-/* SHOP */
-function addItem(it){
- for(let i=0;i<inventory.length;i++){
-  if(inventory[i]===""){inventory[i]=it;renderInv();return true;}
- }
- return false;
+/* ROD */
+let rod=null;
+function updateRod(){
+ if(inventory[selected]==="Rod"){
+  if(!rod){
+   rod=new THREE.Mesh(
+    new THREE.CylinderGeometry(.02,.02,1),
+    new THREE.MeshBasicMaterial({color:0x8b4513})
+   );
+   rod.position.set(.3,-.4,-1);
+   rod.rotation.z=Math.PI/4;
+   camera.add(rod);
+  }
+ }else if(rod){camera.remove(rod);rod=null;}
 }
-buySun.onclick=()=>{if(money>=100&&addItem("Sun Rod")){money-=100;moneyDiv.textContent="$"+money}};
-buyBait.onclick=()=>{if(money>=15&&addItem("Bait")){money-=15;moneyDiv.textContent="$"+money}};
-
-/* NPC CLICK */
-const raycaster=new THREE.Raycaster(),mouse=new THREE.Vector2();
-renderer.domElement.addEventListener("touchstart",e=>{
- mouse.x=(e.touches[0].clientX/innerWidth)*2-1;
- mouse.y=-(e.touches[0].clientY/innerHeight)*2+1;
- raycaster.setFromCamera(mouse,camera);
- const hit=raycaster.intersectObject(fisherman,true);
- if(hit.length && player.position.distanceTo(fisherman.position)<5){
-  shop.style.display="block";
- }
-});
 
 /* FISHING */
-let holding=false,ht=0,fishing=false,taps=0;
-addEventListener("touchstart",()=>{if(inventory[selected].includes("Rod")&&!fishing){holding=true;ht=0}});
-addEventListener("touchend",()=>holding=false);
+let holding=false,holdTime=0,fishing=false,taps=0;
+addEventListener("touchstart",()=>{if(inventory[selected]==="Rod"&&!fishing){holding=true;holdTime=0}});
+addEventListener("touchend",()=>{holding=false;holdTime=0});
 addEventListener("touchstart",()=>{if(fishing)taps++});
 
-function randFish(){
+function randomFish(){
  const r=Math.random();
  if(r<.25)return"Clownfish";
  if(r<.5)return"Tuna";
  return"Shark";
 }
-function addFish(f){
+function addItem(f){
  for(let i=0;i<inventory.length;i++){
   if(inventory[i]===""){inventory[i]=f;renderInv();return;}
  }
 }
-function startFish(){
- fishing=true;msg.style.display="block";msg.textContent="Waiting...";
+function startFishing(){
+ fishing=true;
+ msg.style.display="block";
+ msg.textContent="Waiting for fish...";
  setTimeout(()=>{
-  const f=randFish();msg.textContent=f+" TAP!";
+  const fish=randomFish();
+  msg.textContent=fish+"! TAP!";
   taps=0;
   setTimeout(()=>{
-   if(taps>=10){msg.textContent="Caught "+f;addFish(f)}
-   else msg.textContent="Escaped!";
+   if(taps>=10){msg.textContent="Caught "+fish+"!";addItem(fish);}
+   else msg.textContent="Fish escaped!";
    setTimeout(()=>{msg.style.display="none";fishing=false},2000);
   },5000);
  },500);
@@ -266,6 +301,7 @@ book.onclick=()=>rules.style.display="block";
 /* LOOP */
 function animate(){
  requestAnimationFrame(animate);
+ updateRod();
 
  camera.rotation.order="YXZ";
  camera.rotation.y=yaw;
@@ -273,15 +309,16 @@ function animate(){
 
  const f=new THREE.Vector3(Math.sin(yaw),0,Math.cos(yaw));
  const r=new THREE.Vector3(f.z,0,-f.x);
- player.position.add(f.multiplyScalar(mz*.15));
- player.position.add(r.multiplyScalar(mx*.15));
+ player.position.add(f.multiplyScalar(moveZ*.15));
+ player.position.add(r.multiplyScalar(moveX*.15));
 
- vy-=.01;player.position.y+=vy;
- if(player.position.y<=3){player.position.y=3;vy=0;grounded=true}
+ velocityY-=.01;
+ player.position.y+=velocityY;
+ if(player.position.y<=3){player.position.y=3;velocityY=0;grounded=true;}
 
  if(holding&&!fishing){
-  ht+=.016;
-  if(ht>=2){startFish();holding=false}
+  holdTime+=.016;
+  if(holdTime>=2){startFishing();holding=false;}
  }
 
  renderer.render(scene,camera);
