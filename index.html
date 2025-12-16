@@ -149,6 +149,7 @@ html,body{margin:0;padding:0;overflow:hidden;background:black;touch-action:none}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/controls/OrbitControls.js"></script>
 <script>
 /* ===== SCENE ===== */
 const scene=new THREE.Scene();
@@ -163,38 +164,48 @@ document.body.appendChild(renderer.domElement);
 scene.add(new THREE.AmbientLight(0xffffff,.7));
 const sun=new THREE.DirectionalLight(0xffffff,1);
 sun.position.set(10,20,10);
+sun.castShadow=true;
 scene.add(sun);
 
-/* WORLD */
-const water=new THREE.Mesh(
- new THREE.BoxGeometry(200,.5,200),
- new THREE.MeshLambertMaterial({color:0x1e90ff})
-);
-water.position.y=.25;
+/* WATER */
+const waterGeo=new THREE.PlaneGeometry(200,200,50,50);
+const waterMat=new THREE.MeshStandardMaterial({
+  color:0x1e90ff,
+  roughness:0.3,
+  metalness:0.1,
+  side:THREE.DoubleSide
+});
+const water=new THREE.Mesh(waterGeo,waterMat);
+water.rotation.x=-Math.PI/2;
+water.position.y=0;
 scene.add(water);
 
-const island=new THREE.Mesh(
- new THREE.CylinderGeometry(18,22,2,32),
- new THREE.MeshLambertMaterial({color:0x2e8b57})
-);
+/* ISLAND */
+const islandGeo=new THREE.CylinderGeometry(18,22,2,64);
+const islandMat=new THREE.MeshStandardMaterial({color:0x2e8b57, roughness:0.8, metalness:0.1});
+const island=new THREE.Mesh(islandGeo,islandMat);
 island.position.set(0,1,0);
 scene.add(island);
 
 /* TREES */
 function addTree(x,z){
- const trunk=new THREE.Mesh(
-  new THREE.CylinderGeometry(.3,.4,3),
-  new THREE.MeshLambertMaterial({color:0x8b4513})
- );
- trunk.position.set(x,2.5,z);
- scene.add(trunk);
+  // trunk
+  const trunkGeo=new THREE.CylinderGeometry(0.3,0.5,3,12);
+  const trunkMat=new THREE.MeshStandardMaterial({color:0x8b4513});
+  const trunk=new THREE.Mesh(trunkGeo,trunkMat);
+  trunk.position.set(x,1.5,z);
+  trunk.castShadow=true;
+  scene.add(trunk);
 
- const leaves=new THREE.Mesh(
-  new THREE.SphereGeometry(1.5,12,12),
-  new THREE.MeshLambertMaterial({color:0x228b22})
- );
- leaves.position.set(x,4,z);
- scene.add(leaves);
+  // layered leaves
+  for(let i=0;i<3;i++){
+    const leavesGeo=new THREE.ConeGeometry(1.5-i*0.3,1.5,8);
+    const leavesMat=new THREE.MeshStandardMaterial({color:0x228b22});
+    const leaves=new THREE.Mesh(leavesGeo,leavesMat);
+    leaves.position.set(x,3+i*0.5,z);
+    leaves.castShadow=true;
+    scene.add(leaves);
+  }
 }
 for(let i=0;i<6;i++){
  addTree(Math.random()*12-6,Math.random()*12-6);
@@ -335,7 +346,7 @@ function previewFish(name){
              0xffffff;
  preview=new THREE.Mesh(
   new THREE.SphereGeometry(.25,16,16),
-  new THREE.MeshLambertMaterial({color})
+  new THREE.MeshStandardMaterial({color})
  );
  preview.position.set(0,-.2,-1);
  camera.add(preview);
@@ -349,13 +360,12 @@ function updateRod(){
   if(!rod){
    rod=new THREE.Mesh(
     new THREE.CylinderGeometry(.02,.02,1),
-    new THREE.MeshBasicMaterial({color:inventory[selected]==="Sun Rod"?0xffcc00:0x8b4513})
+    new THREE.MeshStandardMaterial({color:inventory[selected]==="Sun Rod"?0xffcc00:0x8b4513})
    );
    rod.position.set(.3,-.4,-1);
    rod.rotation.z=Math.PI/4;
    camera.add(rod);
   }else{
-   // update color if changed
    rod.material.color.set(inventory[selected]==="Sun Rod"?0xffcc00:0x8b4513);
   }
  }else if(rod){camera.remove(rod);rod=null;}
@@ -429,7 +439,6 @@ function randomFish(){
 }
 
 function addItem(f){
- // check for stack
  for(let i=0;i<inventory.length;i++){
    const {name,count} = parseStack(inventory[i]);
    if(name===f){
@@ -438,7 +447,6 @@ function addItem(f){
      return;
    }
  }
- // find empty slot
  for(let i=0;i<inventory.length;i++){
    if(inventory[i]===""){inventory[i]=f;renderInv();return;}
  }
@@ -525,6 +533,12 @@ function animate(){
   holdTime+=.016;
   if(holdTime>=2){startFishing();holding=false;}
  }
+
+ // Animate water
+ for(let i=0;i<water.geometry.attributes.position.count;i++){
+   water.geometry.attributes.position.setY(i,Math.sin(i/5 + performance.now()*0.002)*0.1);
+ }
+ water.geometry.attributes.position.needsUpdate=true;
 
  renderer.render(scene,camera);
 }
