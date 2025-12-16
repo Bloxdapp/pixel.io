@@ -52,7 +52,7 @@ html,body{margin:0;padding:0;overflow:hidden;background:black;touch-action:none}
 • Jump button<br><br>
 🎣 Fishing:<br>
 • Equip rod<br>
-• Stand in sea<br>
+• Stand on sand or water<br>
 • Hold touch 2s<br>
 • Tap fast to catch fish<br><br>
 🐟 Fish:<br>
@@ -261,10 +261,10 @@ function updateRod(){
 
 /* FISHING */
 let holding=false,holdTime=0,fishing=false,taps=0;
-function isInWater(){return player.position.y<2.4;}
+function canFish(){return player.position.y<2.6;}
 
 addEventListener("touchstart",()=>{
- if(inventory[selected]==="Rod"&&!fishing&&isInWater()){
+ if(inventory[selected]==="Rod"&&!fishing&&canFish()){
   holding=true;holdTime=0;
  }
 });
