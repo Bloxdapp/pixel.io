@@ -164,7 +164,7 @@ html,body{margin:0;padding:0;overflow:hidden;background:black;touch-action:none}
 <div id="inventory"></div>
 
 <div id="shop">
- <h3>Shop</h3>
+ <h3>Shop <span style="font-size:small;color:#999">(Tap Fisherman NPC)</span></h3>
  <button id="buySunRod">Buy Sun Rod ($1000)</button><br>
  <button id="buyBait">Buy 1 Bait ($25)</button><br><br>
  <button onclick="shop.style.display='none'">CLOSE</button>
@@ -422,15 +422,20 @@ function updateRod(){
  }else if(rod){camera.remove(rod);rod=null;}
 }
 
-/* NPC CLICK → SHOP */
+/* NPC CLICK → SHOP (CORRECTED RAYCASTING) */
 const raycaster=new THREE.Raycaster();
 const touchVec=new THREE.Vector2();
 addEventListener("touchstart",e=>{
+ // Only attempt raycast if a UI element wasn't touched
+ if(e.target.closest("#joystick, #stick, #jump, #book, #inventory, .slot, #shop")) return;
+
  touchVec.x=(e.touches[0].clientX/innerWidth)*2-1;
  touchVec.y=-(e.touches[0].clientY/innerHeight)*2+1;
  raycaster.setFromCamera(touchVec,camera);
- // Check intersections with the fisherman group's children
- if(raycaster.intersectObject(fisherman.children, true).length){ 
+ 
+ // --- FIX IS HERE ---
+ // raycaster.intersectObjects checks the array of objects (the body, head, hat)
+ if(raycaster.intersectObjects(fisherman.children).length){ 
   shop.style.display="block";
  }
 });
