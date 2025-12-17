@@ -520,8 +520,8 @@ addEventListener("touchstart",e=>{
  touchVec.x=(e.touches[0].clientX/innerWidth)*2-1;
  touchVec.y=-(e.touches[0].clientY/innerHeight)*2+1;
  raycaster.setFromCamera(touchVec,camera);
- if(raycaster.intersectObject(orb).length){
-  shop.style.display="block";
+ if(raycaster.intersectObjects(shopTable.children, true).length){
+  shop.style.display = "block";
  }
 });
 
