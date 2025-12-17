@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -228,10 +227,46 @@ for(let i=0;i<6;i++){
  addTree(Math.random()*12-6,Math.random()*12-6);
 }
 
-/* ORB */
-const orb=new THREE.Mesh(new THREE.SphereGeometry(.4,16,16),new THREE.MeshStandardMaterial({color:0xffff00,emissive:0xffff00,emissiveIntensity:.7}));
-orb.position.set(3,1.8,3);
-scene.add(orb);
+/* ===== FISHERMAN NPC ===== */
+const fisherman = new THREE.Group();
+
+// Body
+const bodyGeo = new THREE.CylinderGeometry(0.3, 0.5, 1.5, 16);
+const bodyMat = new THREE.MeshStandardMaterial({color: 0x8b4513});
+const body = new THREE.Mesh(bodyGeo, bodyMat);
+body.position.y = 0.75;
+fisherman.add(body);
+
+// Head
+const headGeo = new THREE.SphereGeometry(0.25, 16, 16);
+const headMat = new THREE.MeshStandardMaterial({color: 0xffcc99});
+const head = new THREE.Mesh(headGeo, headMat);
+head.position.y = 1.75;
+fisherman.add(head);
+
+// Hat
+const hatGeo = new THREE.ConeGeometry(0.35, 0.4, 16);
+const hatMat = new THREE.MeshStandardMaterial({color: 0x333333});
+const hat = new THREE.Mesh(hatGeo, hatMat);
+hat.position.y = 1.95;
+fisherman.add(hat);
+
+// Arms
+const armGeo = new THREE.CylinderGeometry(0.05, 0.05, 0.7, 12);
+const armMat = new THREE.MeshStandardMaterial({color: 0x8b4513});
+const leftArm = new THREE.Mesh(armGeo, armMat);
+leftArm.position.set(-0.4, 1.3, 0);
+leftArm.rotation.z = Math.PI/4;
+fisherman.add(leftArm);
+
+const rightArm = new THREE.Mesh(armGeo, armMat);
+rightArm.position.set(0.4, 1.3, 0);
+rightArm.rotation.z = -Math.PI/4;
+fisherman.add(rightArm);
+
+// Position fisherman
+fisherman.position.set(3, 0, 3);
+scene.add(fisherman);
 
 /* PLAYER */
 const player=new THREE.Object3D();
@@ -383,7 +418,7 @@ expandBtn.textContent = "Buy 3 Inventory Slots ($500)";
 expandBtn.onclick = ()=>{
   if(money<500) return alert("Not enough money");
   money -= 500;
-  document.getElementById("money").textContent = "$"+money;
+  document.getElementById("money").textContent="$"+money;
   expandInventory(3);
 };
 shop.appendChild(expandBtn);
@@ -403,14 +438,14 @@ function updateRod(){
  }else if(rod){camera.remove(rod);rod=null;}
 }
 
-/* ORB CLICK → SHOP */
+/* NPC CLICK → SHOP */
 const raycaster=new THREE.Raycaster();
 const touchVec=new THREE.Vector2();
 addEventListener("touchstart",e=>{
  touchVec.x=(e.touches[0].clientX/innerWidth)*2-1;
  touchVec.y=-(e.touches[0].clientY/innerHeight)*2+1;
  raycaster.setFromCamera(touchVec,camera);
- if(raycaster.intersectObject(orb).length){
+ if(raycaster.intersectObject(fisherman,true).length){
   shop.style.display="block";
  }
 });
