@@ -402,7 +402,7 @@ function slotTap(index){
   renderInv();
   updateRod();
 
-  if(!name || name==="Rod" || name==="Sun Rod" || name==="Bait") return;
+  if(!name || name==="Rod" || name==="Sun Rod") return;
 
   const now = Date.now();
   if(lastTapTime && now-lastTapTime<500 && selected===index){
