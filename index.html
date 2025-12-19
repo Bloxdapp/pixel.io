@@ -1,4 +1,4 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -406,10 +406,10 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
 
-/* ENHANCED LIGHTING */
-scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+/* SIMPLE LIGHTING */
+scene.add(new THREE.AmbientLight(0xffffff, 0.7));
 
-const sun = new THREE.DirectionalLight(0xffffff, 1.2);
+const sun = new THREE.DirectionalLight(0xffffff, 0.8);
 sun.position.set(50, 100, 50);
 sun.castShadow = true;
 sun.shadow.mapSize.width = 2048;
@@ -422,22 +422,10 @@ sun.shadow.camera.near = 0.5;
 sun.shadow.camera.far = 500;
 scene.add(sun);
 
-// Add fill light
-const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
-fillLight.position.set(-50, 50, -50);
-scene.add(fillLight);
-
-// Add rim light
-const rimLight = new THREE.DirectionalLight(0xffffff, 0.2);
-rimLight.position.set(0, 50, -100);
-scene.add(rimLight);
-
-/* ENHANCED OCEAN */
-const oceanGeometry = new THREE.PlaneGeometry(5000, 5000, 1, 1);
-const oceanMaterial = new THREE.MeshStandardMaterial({
-  color: 0x1e90ff,
-  roughness: 0.9,
-  metalness: 0
+/* SIMPLE OCEAN - NO MOVEMENT */
+const oceanGeometry = new THREE.PlaneGeometry(5000, 5000);
+const oceanMaterial = new THREE.MeshLambertMaterial({
+  color: 0x1e90ff
 });
 const ocean = new THREE.Mesh(oceanGeometry, oceanMaterial);
 ocean.rotation.x = -Math.PI / 2;
@@ -445,12 +433,10 @@ ocean.position.y = -1;
 ocean.receiveShadow = true;
 scene.add(ocean);
 
-/* ENHANCED ISLAND */
-const islandGeometry = new THREE.CylinderGeometry(20, 25, 3, 64);
-const islandMaterial = new THREE.MeshStandardMaterial({
-  color: 0x228b22,
-  roughness: 0.9,
-  metalness: 0
+/* SIMPLE ISLAND - NO GLOW */
+const islandGeometry = new THREE.CylinderGeometry(20, 25, 3, 32);
+const islandMaterial = new THREE.MeshLambertMaterial({
+  color: 0x228b22
 });
 const island = new THREE.Mesh(islandGeometry, islandMaterial);
 island.position.set(0, 1.5, 0);
@@ -458,12 +444,10 @@ island.castShadow = true;
 island.receiveShadow = true;
 scene.add(island);
 
-// Add island detail
-const islandDetailGeometry = new THREE.CylinderGeometry(19, 24, 0.5, 64);
-const islandDetailMaterial = new THREE.MeshStandardMaterial({
-  color: 0x32cd32,
-  roughness: 0.9,
-  metalness: 0
+// Simple island detail
+const islandDetailGeometry = new THREE.CylinderGeometry(19, 24, 0.5, 32);
+const islandDetailMaterial = new THREE.MeshLambertMaterial({
+  color: 0x32cd32
 });
 const islandDetail = new THREE.Mesh(islandDetailGeometry, islandDetailMaterial);
 islandDetail.position.set(0, 2.75, 0);
@@ -471,57 +455,41 @@ islandDetail.castShadow = true;
 islandDetail.receiveShadow = true;
 scene.add(islandDetail);
 
-/* ===== ENHANCED FISHERMAN NPC ===== */
+/* ===== FISHERMAN NPC ===== */
 const fisherman = new THREE.Group();
 fisherman.position.set(-8, 2, 8);
 
-// Enhanced fisherman body
+// Fisherman body
 const body = new THREE.Mesh(
   new THREE.CylinderGeometry(0.6, 0.6, 1.8, 12),
-  new THREE.MeshStandardMaterial({ 
-    color: 0x8b4513,
-    roughness: 0.8,
-    metalness: 0.1
-  })
+  new THREE.MeshLambertMaterial({ color: 0x8b4513 })
 );
 body.position.y = 0.9;
 body.castShadow = true;
 fisherman.add(body);
 
-// Enhanced fisherman head
+// Fisherman head
 const head = new THREE.Mesh(
   new THREE.SphereGeometry(0.5, 16, 16),
-  new THREE.MeshStandardMaterial({ 
-    color: 0xf0c8a0,
-    roughness: 0.7,
-    metalness: 0
-  })
+  new THREE.MeshLambertMaterial({ color: 0xf0c8a0 })
 );
 head.position.y = 2.2;
 head.castShadow = true;
 fisherman.add(head);
 
-// Enhanced fisherman hat
+// Fisherman hat
 const hat = new THREE.Mesh(
   new THREE.ConeGeometry(0.8, 0.4, 12),
-  new THREE.MeshStandardMaterial({ 
-    color: 0x8b0000,
-    roughness: 0.6,
-    metalness: 0
-  })
+  new THREE.MeshLambertMaterial({ color: 0x8b0000 })
 );
 hat.position.y = 2.6;
 hat.rotation.x = Math.PI / 8;
 fisherman.add(hat);
 
-// Enhanced fishing rod
+// Fishing rod
 const npcRod = new THREE.Mesh(
   new THREE.CylinderGeometry(0.04, 0.04, 2.5, 8),
-  new THREE.MeshStandardMaterial({ 
-    color: 0x8b4513,
-    roughness: 0.5,
-    metalness: 0.2
-  })
+  new THREE.MeshLambertMaterial({ color: 0x8b4513 })
 );
 npcRod.position.set(0.7, 1.5, -0.6);
 npcRod.rotation.z = Math.PI / 6;
@@ -529,79 +497,44 @@ fisherman.add(npcRod);
 
 scene.add(fisherman);
 
-/* ===== ENHANCED UPGRADES NPC ===== */
+/* ===== UPGRADES NPC ===== */
 const upgradesNPC = new THREE.Group();
 upgradesNPC.position.set(8, 2, -8);
 
-// Enhanced upgrades NPC body
+// Upgrades NPC body
 const upgradesBody = new THREE.Mesh(
   new THREE.CylinderGeometry(0.6, 0.6, 1.8, 12),
-  new THREE.MeshStandardMaterial({ 
-    color: 0x2e8b57,
-    roughness: 0.8,
-    metalness: 0.1
-  })
+  new THREE.MeshLambertMaterial({ color: 0x2e8b57 })
 );
 upgradesBody.position.y = 0.9;
 upgradesBody.castShadow = true;
 upgradesNPC.add(upgradesBody);
 
-// Enhanced upgrades NPC head
+// Upgrades NPC head
 const upgradesHead = new THREE.Mesh(
   new THREE.SphereGeometry(0.5, 16, 16),
-  new THREE.MeshStandardMaterial({ 
-    color: 0xf0c8a0,
-    roughness: 0.7,
-    metalness: 0
-  })
+  new THREE.MeshLambertMaterial({ color: 0xf0c8a0 })
 );
 upgradesHead.position.y = 2.2;
 upgradesHead.castShadow = true;
 upgradesNPC.add(upgradesHead);
 
-// Enhanced wizard hat
+// Wizard hat
 const wizardHat = new THREE.Mesh(
   new THREE.ConeGeometry(0.9, 1.0, 12),
-  new THREE.MeshStandardMaterial({ 
-    color: 0x4b0082,
-    roughness: 0.5,
-    metalness: 0.3
-  })
+  new THREE.MeshLambertMaterial({ color: 0x4b0082 })
 );
 wizardHat.position.y = 2.8;
 upgradesNPC.add(wizardHat);
 
-// Enhanced magical staff
+// Magical staff
 const staff = new THREE.Mesh(
   new THREE.CylinderGeometry(0.05, 0.05, 3.0, 8),
-  new THREE.MeshStandardMaterial({ 
-    color: 0x800080,
-    roughness: 0.3,
-    metalness: 0.7
-  })
+  new THREE.MeshLambertMaterial({ color: 0x800080 })
 );
 staff.position.set(0.8, 1.2, 0.4);
 staff.rotation.z = -Math.PI / 8;
 upgradesNPC.add(staff);
-
-// Enhanced crystal with glow
-const crystal = new THREE.Mesh(
-  new THREE.OctahedronGeometry(0.15, 2),
-  new THREE.MeshStandardMaterial({ 
-    color: 0x00ffff,
-    emissive: 0x00ffff,
-    emissiveIntensity: 0.8,
-    roughness: 0.1,
-    metalness: 0.9
-  })
-);
-crystal.position.set(1.0, 2.4, 0.6);
-upgradesNPC.add(crystal);
-
-// Add crystal glow
-const crystalGlow = new THREE.PointLight(0x00ffff, 1, 5);
-crystalGlow.position.copy(crystal.position);
-upgradesNPC.add(crystalGlow);
 
 scene.add(upgradesNPC);
 
@@ -611,91 +544,53 @@ const fishModels = {};
 // Clownfish
 const clownfishGeometry = new THREE.ConeGeometry(0.5, 1.5, 8);
 clownfishGeometry.rotateX(Math.PI / 2);
-const clownfishMaterial = new THREE.MeshStandardMaterial({
-  color: 0xFF6B35,
-  roughness: 0.4,
-  metalness: 0.2
-});
+const clownfishMaterial = new THREE.MeshLambertMaterial({ color: 0xFF6B35 });
 fishModels.Clownfish = new THREE.Mesh(clownfishGeometry, clownfishMaterial);
 
 // Tuna
 const tunaGeometry = new THREE.CapsuleGeometry(0.3, 1.2, 4, 8);
 tunaGeometry.rotateZ(Math.PI / 2);
-const tunaMaterial = new THREE.MeshStandardMaterial({
-  color: 0x4682B4,
-  roughness: 0.3,
-  metalness: 0.3
-});
+const tunaMaterial = new THREE.MeshLambertMaterial({ color: 0x4682B4 });
 fishModels.Tuna = new THREE.Mesh(tunaGeometry, tunaMaterial);
 
 // Shark
 const sharkGeometry = new THREE.ConeGeometry(0.4, 2.0, 8);
 sharkGeometry.rotateX(Math.PI / 2);
-const sharkMaterial = new THREE.MeshStandardMaterial({
-  color: 0x708090,
-  roughness: 0.5,
-  metalness: 0.1
-});
+const sharkMaterial = new THREE.MeshLambertMaterial({ color: 0x708090 });
 fishModels.Shark = new THREE.Mesh(sharkGeometry, sharkMaterial);
 
 // Pufferfish
 const pufferfishGeometry = new THREE.SphereGeometry(0.6, 16, 16);
-const pufferfishMaterial = new THREE.MeshStandardMaterial({
-  color: 0x32CD32,
-  roughness: 0.7,
-  metalness: 0
-});
+const pufferfishMaterial = new THREE.MeshLambertMaterial({ color: 0x32CD32 });
 fishModels.Pufferfish = new THREE.Mesh(pufferfishGeometry, pufferfishMaterial);
 
 // Sea Turtle
 const turtleGeometry = new THREE.BoxGeometry(1.2, 0.4, 1.5);
-const turtleMaterial = new THREE.MeshStandardMaterial({
-  color: 0x228B22,
-  roughness: 0.6,
-  metalness: 0
-});
+const turtleMaterial = new THREE.MeshLambertMaterial({ color: 0x228B22 });
 fishModels.SeaTurtle = new THREE.Mesh(turtleGeometry, turtleMaterial);
 
 // Manta Ray
 const mantaGeometry = new THREE.ConeGeometry(1.5, 0.3, 4);
 mantaGeometry.rotateX(Math.PI / 2);
-const mantaMaterial = new THREE.MeshStandardMaterial({
-  color: 0x483D8B,
-  roughness: 0.4,
-  metalness: 0.2
-});
+const mantaMaterial = new THREE.MeshLambertMaterial({ color: 0x483D8B });
 fishModels.MantaRay = new THREE.Mesh(mantaGeometry, mantaMaterial);
 
 // Great White Shark
 const greatWhiteGeometry = new THREE.ConeGeometry(0.6, 3.0, 12);
 greatWhiteGeometry.rotateX(Math.PI / 2);
-const greatWhiteMaterial = new THREE.MeshStandardMaterial({
-  color: 0xFFFFFF,
-  roughness: 0.3,
-  metalness: 0.4
-});
+const greatWhiteMaterial = new THREE.MeshLambertMaterial({ color: 0xFFFFFF });
 fishModels.GreatWhiteShark = new THREE.Mesh(greatWhiteGeometry, greatWhiteMaterial);
 
 // Terrorshark
 const terrorsharkGeometry = new THREE.ConeGeometry(0.8, 3.5, 12);
 terrorsharkGeometry.rotateX(Math.PI / 2);
-const terrorsharkMaterial = new THREE.MeshStandardMaterial({
-  color: 0xFF0000,
-  emissive: 0x660000,
-  emissiveIntensity: 0.3,
-  roughness: 0.2,
-  metalness: 0.5
-});
+const terrorsharkMaterial = new THREE.MeshLambertMaterial({ color: 0xFF0000 });
 fishModels.Terrorshark = new THREE.Mesh(terrorsharkGeometry, terrorsharkMaterial);
 
 // Megalodon
 const megalodonGeometry = new THREE.ConeGeometry(1.2, 5.0, 16);
 megalodonGeometry.rotateX(Math.PI / 2);
-const megalodonMaterial = new THREE.MeshStandardMaterial({
-  color: 0x2F4F4F,
-  roughness: 0.4,
-  metalness: 0.3
-});
+const megalodonMaterial = new THREE.MeshLambertMaterial({ color: 0x2F4F4F });
 fishModels.Megalodon = new THREE.Mesh(megalodonGeometry, megalodonMaterial);
 
 // Kraken
@@ -703,10 +598,7 @@ const krakenGeometry = new THREE.SphereGeometry(1.0, 32, 32);
 for(let i = 0; i < 8; i++) {
   const tentacle = new THREE.ConeGeometry(0.2, 3.0, 8);
   tentacle.rotateX(Math.PI / 2);
-  const tentacleMesh = new THREE.Mesh(tentacle, new THREE.MeshStandardMaterial({
-    color: 0x8B0000,
-    roughness: 0.5
-  }));
+  const tentacleMesh = new THREE.Mesh(tentacle, new THREE.MeshLambertMaterial({ color: 0x8B0000 }));
   tentacleMesh.position.set(
     Math.cos(i * Math.PI / 4) * 1.2,
     0,
@@ -714,13 +606,7 @@ for(let i = 0; i < 8; i++) {
   );
   krakenGeometry.merge(tentacleMesh.geometry, tentacleMesh.matrix);
 }
-const krakenMaterial = new THREE.MeshStandardMaterial({
-  color: 0x8B0000,
-  emissive: 0x330000,
-  emissiveIntensity: 0.2,
-  roughness: 0.6,
-  metalness: 0.2
-});
+const krakenMaterial = new THREE.MeshLambertMaterial({ color: 0x8B0000 });
 fishModels.Kraken = new THREE.Mesh(krakenGeometry, krakenMaterial);
 
 // Make all fish cast shadows
@@ -729,39 +615,27 @@ Object.values(fishModels).forEach(fish => {
   fish.receiveShadow = true;
 });
 
-/* ===== ENHANCED VEGETATION ===== */
+/* ===== SIMPLE VEGETATION ===== */
 const vegetation = new THREE.Group();
 
-// Enhanced tree
+// Simple tree
 function createTree(x, z, scale = 1) {
   const tree = new THREE.Group();
   
-  // Enhanced trunk
+  // Trunk
   const trunk = new THREE.Mesh(
     new THREE.CylinderGeometry(0.4*scale, 0.6*scale, 8*scale, 12),
-    new THREE.MeshStandardMaterial({ 
-      color: 0x8b5a2b, 
-      roughness: 0.9,
-      metalness: 0
-    })
+    new THREE.MeshLambertMaterial({ color: 0x8b5a2b })
   );
   trunk.position.y = 4*scale;
   trunk.castShadow = true;
   tree.add(trunk);
   
-  // Enhanced leaves
-  const leafColors = [
-    0x228B22, 0x32CD32, 0x3CB371
-  ];
-  
+  // Leaves
   for(let i = 0; i < 5; i++) {
     const leaves = new THREE.Mesh(
       new THREE.ConeGeometry(3.0*scale - i*0.5, 3.0*scale, 12),
-      new THREE.MeshStandardMaterial({
-        color: leafColors[Math.floor(Math.random() * leafColors.length)],
-        roughness: 0.9,
-        metalness: 0
-      })
+      new THREE.MeshLambertMaterial({ color: 0x228B22 })
     );
     leaves.position.y = 7*scale + i*1.5*scale;
     leaves.castShadow = true;
@@ -773,7 +647,7 @@ function createTree(x, z, scale = 1) {
   return tree;
 }
 
-// Enhanced bush
+// Simple bush
 function createBush(x, z) {
   const bush = new THREE.Group();
   const bushCount = 3 + Math.floor(Math.random() * 4);
@@ -781,11 +655,7 @@ function createBush(x, z) {
   for(let i = 0; i < bushCount; i++) {
     const bushPart = new THREE.Mesh(
       new THREE.SphereGeometry(0.8 + Math.random() * 0.4, 12, 12),
-      new THREE.MeshStandardMaterial({
-        color: new THREE.Color().setHSL(0.3, 0.7, 0.3 + Math.random() * 0.1),
-        roughness: 0.9,
-        metalness: 0
-      })
+      new THREE.MeshLambertMaterial({ color: 0x32CD32 })
     );
     bushPart.position.set(
       (Math.random() - 0.5) * 2,
@@ -1147,7 +1017,7 @@ function updateRod() {
     if(!rod) {
       rod = new THREE.Mesh(
         new THREE.CylinderGeometry(0.03, 0.03, 1.2, 8),
-        new THREE.MeshStandardMaterial({color: 0x8b4513})
+        new THREE.MeshLambertMaterial({color: 0x8b4513})
       );
       rod.position.set(0.4, -0.3, -1.2);
       rod.rotation.z = Math.PI / 3.5;
@@ -1155,28 +1025,22 @@ function updateRod() {
     }
     
     // Enhanced rod colors
-    let color, emissive;
+    let color;
     switch(currentRod) {
       case "Sun Rod": 
         color = 0xffcc00; 
-        emissive = 0xff9900;
         break;
       case "Moon Rod": 
         color = 0x8a2be2; 
-        emissive = 0x4b0082;
         break;
       case "Ocean Rod": 
         color = 0x00bfff; 
-        emissive = 0x0088cc;
         break;
       default: 
         color = 0x8b4513; 
-        emissive = 0x000000;
     }
     
     rod.material.color.set(color);
-    rod.material.emissive = new THREE.Color(emissive);
-    rod.material.emissiveIntensity = currentRod !== "Rod" ? 0.3 : 0;
   } else if(rod) {
     camera.remove(rod);
     rod = null;
@@ -1657,12 +1521,6 @@ function animateUpgradesNPC() {
   
   if(staff) {
     staff.rotation.z = -Math.PI/8 + Math.sin(upgradesNPCTime * 1.1) * 0.08;
-  }
-  
-  if(crystal) {
-    crystal.rotation.y += 0.02;
-    crystal.scale.setScalar(1 + Math.sin(upgradesNPCTime * 3.5) * 0.15);
-    crystal.material.emissiveIntensity = 0.5 + Math.sin(upgradesNPCTime * 4) * 0.3;
   }
 }
 
