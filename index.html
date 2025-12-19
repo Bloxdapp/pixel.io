@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,112 +11,187 @@ html,body{margin:0;padding:0;overflow:hidden;background:black;touch-action:none}
 #money{
  position:fixed;bottom:10px;right:10px;
  color:white;font-size:18px;
- background:rgba(0,0,0,.5);
- padding:6px 10px;border-radius:6px
+ background:rgba(0,0,0,.7);
+ padding:8px 15px;border-radius:10px;
+ font-family:'Arial',sans-serif;
+ border:2px solid gold;
+ box-shadow:0 0 15px rgba(255,215,0,0.3);
 }
 #book{
  position:fixed;top:10px;left:10px;
- font-size:28px;cursor:pointer;
- z-index:10
+ font-size:32px;cursor:pointer;
+ z-index:10;
+ background:rgba(0,0,0,.7);
+ border-radius:50%;
+ width:50px;height:50px;
+ display:flex;align-items:center;justify-content:center;
+ border:2px solid white;
+ box-shadow:0 0 10px rgba(255,255,255,0.3);
+ transition:transform 0.2s;
 }
+#book:hover{transform:scale(1.1);}
 #rules{
  position:fixed;top:50%;left:50%;
  transform:translate(-50%,-50%);
- width:85%;max-width:420px;
- background:rgba(0,0,0,.9);
- color:white;padding:20px;
- border-radius:12px;
+ width:90%;max-width:500px;
+ background:linear-gradient(to bottom, rgba(0,20,40,0.95), rgba(0,40,80,0.95));
+ color:white;padding:25px;
+ border-radius:15px;
  display:none;
- z-index:20
+ z-index:20;
+ border:3px solid #00a8ff;
+ box-shadow:0 0 40px rgba(0,168,255,0.5);
+ font-family:'Arial',sans-serif;
+}
+#rules h2{
+ color:#00a8ff;
+ text-align:center;
+ margin-bottom:20px;
+ font-size:24px;
 }
 #rules button{
- margin-top:12px;padding:6px 14px;
- font-size:16px
+ margin-top:20px;padding:10px 20px;
+ font-size:16px;
+ background:linear-gradient(to right, #00a8ff, #0097e6);
+ color:white;
+ border:none;
+ border-radius:8px;
+ cursor:pointer;
+ font-weight:bold;
 }
 #msg{
  position:fixed;top:50%;left:50%;
  transform:translate(-50%,-50%);
- color:white;font-size:22px;
- display:none;text-shadow:2px 2px 5px black
+ color:white;font-size:24px;
+ display:none;text-shadow:2px 2px 8px black;
+ background:rgba(0,0,0,0.7);
+ padding:15px 25px;
+ border-radius:10px;
+ z-index:30;
+ font-weight:bold;
 }
 
 /* Controls */
-#joystick{position:fixed;bottom:120px;left:20px;width:110px;height:110px;background:rgba(255,255,255,.15);border-radius:50%}
-#stick{position:absolute;left:30px;top:30px;width:50px;height:50px;background:white;border-radius:50%}
-#jump{position:fixed;bottom:120px;right:20px;width:80px;height:80px;border-radius:50%}
+#joystick{
+ position:fixed;bottom:120px;left:20px;
+ width:120px;height:120px;
+ background:radial-gradient(circle, rgba(255,255,255,0.2), rgba(255,255,255,0.05));
+ border-radius:50%;
+ border:2px solid rgba(255,255,255,0.3);
+ box-shadow:0 0 20px rgba(255,255,255,0.1);
+}
+#stick{
+ position:absolute;left:35px;top:35px;
+ width:50px;height:50px;
+ background:radial-gradient(circle, white, #e0e0e0);
+ border-radius:50%;
+ border:2px solid rgba(0,0,0,0.2);
+ box-shadow:0 0 10px rgba(255,255,255,0.5);
+}
+#jump{
+ position:fixed;bottom:120px;right:20px;
+ width:90px;height:90px;
+ border-radius:50%;
+ background:linear-gradient(to bottom, #4CAF50, #388E3C);
+ color:white;
+ font-size:16px;
+ font-weight:bold;
+ border:none;
+ box-shadow:0 0 20px rgba(76,175,80,0.5);
+ border:2px solid #81C784;
+ cursor:pointer;
+ transition:transform 0.1s;
+}
+#jump:active{transform:scale(0.95);}
 
 /* INVENTORY */
 #inventory{
   position: fixed;
-  bottom: 10px;
+  bottom: 70px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 6px;
+  gap: 8px;
   overflow-x: auto;
-  max-width: 90%;
-  padding: 6px;
-  background: rgba(0,0,0,.3);
-  border-radius: 6px;
+  max-width: 95%;
+  padding: 10px;
+  background: rgba(0,0,0,0.6);
+  border-radius: 12px;
+  border: 2px solid rgba(255,255,255,0.2);
+  backdrop-filter: blur(5px);
 }
 .slot{
-  width: 42px;
-  height: 42px;
-  border: 2px solid white;
+  width: 50px;
+  height: 50px;
+  border: 2px solid rgba(255,255,255,0.3);
   color: white;
-  font-size: 9px;
+  font-size: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0,0,0,.5);
+  background: rgba(0,0,0,0.8);
   flex: 0 0 auto;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
 }
-.slot.active{border-color: yellow}
+.slot.active{
+  border-color: gold;
+  box-shadow:0 0 15px gold;
+  transform:scale(1.1);
+}
+.slot-count{
+  position:absolute;
+  bottom:2px;right:2px;
+  background:rgba(0,0,0,0.8);
+  color:white;
+  font-size:9px;
+  padding:1px 4px;
+  border-radius:3px;
+}
 
-/* SHOP */
-#shop{
+/* SHOPS */
+#shop, #upgradesShop{
  position:fixed;
  top:50%;left:50%;
  transform:translate(-50%,-50%);
- background:rgba(0,0,0,.9);
+ background:linear-gradient(to bottom, rgba(0,30,60,0.95), rgba(0,50,100,0.95));
  color:white;
- padding:20px;
- border-radius:12px;
- display:none;
- z-index:50;
- text-align:center
-}
-#shop button{
- margin:6px;
- padding:6px 14px;
- font-size:16px
-}
-
-/* UPGRADES SHOP */
-#upgradesShop{
- position:fixed;
- top:50%;left:50%;
- transform:translate(-50%,-50%);
- background:rgba(0,0,0,.9);
- color:white;
- padding:20px;
- border-radius:12px;
+ padding:25px;
+ border-radius:15px;
  display:none;
  z-index:50;
  text-align:center;
- width:85%;
- max-width:450px;
+ width:90%;
+ max-width:500px;
+ border:3px solid #00a8ff;
+ box-shadow:0 0 40px rgba(0,168,255,0.5);
 }
-#upgradesShop button{
- margin:6px;
- padding:10px 16px;
- font-size:16px;
- width:100%;
- max-width:350px;
-}
-#upgradesShop h3{
- color:gold;
+#shop h3, #upgradesShop h3{
+ color:#00a8ff;
  margin-bottom:20px;
+ font-size:22px;
+}
+#shop button, #upgradesShop button{
+ margin:8px;
+ padding:12px 20px;
+ font-size:16px;
+ background:linear-gradient(to right, #4CAF50, #388E3C);
+ color:white;
+ border:none;
+ border-radius:8px;
+ cursor:pointer;
+ font-weight:bold;
+ min-width:200px;
+ transition:transform 0.2s;
+}
+#shop button:hover, #upgradesShop button:hover{
+ transform:translateY(-2px);
+}
+#shop button:disabled, #upgradesShop button:disabled{
+ opacity:0.6;
+ cursor:not-allowed;
+ transform:none;
 }
 .upgrade-desc{
  font-size:14px;
@@ -125,42 +199,97 @@ html,body{margin:0;padding:0;overflow:hidden;background:black;touch-action:none}
  margin:5px 0 15px 0;
 }
 
+/* FISH PREVIEW */
+#fishPreview{
+ position:fixed;
+ top:50%;left:50%;
+ transform:translate(-50%,-50%);
+ background:rgba(0,0,0,0.9);
+ color:white;
+ padding:20px;
+ border-radius:15px;
+ display:none;
+ z-index:40;
+ text-align:center;
+ border:3px solid gold;
+ box-shadow:0 0 30px gold;
+}
+#fishPreview h4{
+ color:gold;
+ margin-bottom:15px;
+}
+#fishPreviewCanvas{
+ width:200px;height:200px;
+ margin:10px auto;
+ display:block;
+}
+
 /* LOGIN */
 #login{
  position:fixed;
  top:50%;left:50%;
  transform:translate(-50%,-50%);
- background:rgba(0,0,0,.9);
+ background:linear-gradient(to bottom, rgba(0,30,60,0.95), rgba(0,50,100,0.95));
  color:white;
- padding:20px;
- border-radius:12px;
+ padding:30px;
+ border-radius:15px;
  z-index:100;
  text-align:center;
+ border:3px solid #00a8ff;
+ box-shadow:0 0 40px rgba(0,168,255,0.5);
+}
+#login h2{
+ color:#00a8ff;
+ margin-bottom:20px;
 }
 #login input{
- padding:6px 10px;
+ padding:12px;
  font-size:16px;
- margin-bottom:12px;
+ margin-bottom:15px;
+ width:250px;
+ border-radius:8px;
+ border:2px solid #00a8ff;
+ background:rgba(0,0,0,0.5);
+ color:white;
 }
 #login button{
- padding:6px 14px;
+ padding:12px 30px;
  font-size:16px;
+ background:linear-gradient(to right, #00a8ff, #0097e6);
+ color:white;
+ border:none;
+ border-radius:8px;
+ cursor:pointer;
+ font-weight:bold;
+}
+
+/* WATER EFFECTS */
+#waterCanvas{
+ position:fixed;
+ top:0;left:0;
+ width:100%;height:100%;
+ pointer-events:none;
+ z-index:1;
 }
 </style>
 </head>
 <body>
 
+<!-- WATER CANVAS -->
+<canvas id="waterCanvas"></canvas>
+
 <!-- LOGIN -->
 <div id="login">
- <h2>Login</h2>
- <input type="text" id="username" placeholder="Enter username"><br>
- <button id="loginBtn">Login</button>
+ <h2>🎣 Fishing Adventure</h2>
+ <input type="text" id="username" placeholder="Enter your username"><br>
+ <button id="loginBtn">Start Fishing!</button>
 </div>
 
 <div id="book">📘</div>
 
 <div id="rules">
  <h2>Fishing Game Rules</h2>
+ <div style="text-align:left;line-height:1.6;">
  <p>
  🎮 <b>Controls</b><br>
  • Move with left joystick<br>
@@ -200,6 +329,7 @@ html,body{margin:0;padding:0;overflow:hidden;background:black;touch-action:none}
  • Bigger Button – Makes fish button 50% larger<br>
  • Faster Fishing – 1.5s time limit instead of 1s
  </p>
+ </div>
  <button onclick="rules.style.display='none'">CLOSE</button>
 </div>
 
@@ -210,435 +340,724 @@ html,body{margin:0;padding:0;overflow:hidden;background:black;touch-action:none}
 <button id="jump">JUMP</button>
 <div id="inventory"></div>
 
+<!-- FISH PREVIEW -->
+<div id="fishPreview">
+ <h4>Fish Preview</h4>
+ <canvas id="fishPreviewCanvas"></canvas>
+ <div id="fishStats"></div>
+ <button onclick="fishPreview.style.display='none'">CLOSE</button>
+</div>
+
 <!-- FISHERMAN SHOP -->
 <div id="shop">
- <h3>Fisherman's Shop</h3>
- <p style="font-size:14px;color:#ccc;margin-bottom:15px;">"Welcome to my shop! I have the best fishing gear on the island!"</p>
+ <h3>🎣 Fisherman's Shop</h3>
+ <p style="font-size:14px;color:#ccc;margin-bottom:20px;">"Welcome to my shop! I have the best fishing gear on the island!"</p>
  <button id="buySunRod">Buy Sun Rod ($1000)</button><br>
  <button id="buyMoonRod">Buy Moon Rod ($10,000)</button><br>
  <button id="buyOceanRod">Buy Ocean Rod ($100,000)</button><br>
  <button id="buyInventory">Buy 3 Inventory Slots ($500)</button><br>
- <button id="openUpgrades">Upgrades Shop</button><br>
+ <button id="openUpgrades">⚡ Upgrades Shop</button><br>
  <br>
- <button onclick="shop.style.display='none'">CLOSE</button>
+ <button onclick="shop.style.display='none'" style="background:linear-gradient(to right, #f44336, #d32f2f)">CLOSE</button>
 </div>
 
 <!-- UPGRADES SHOP -->
 <div id="upgradesShop">
- <h3>Fishing Upgrades</h3>
- <p style="font-size:14px;color:#ccc;margin-bottom:15px;">"Make fishing easier with these upgrades!"</p>
+ <h3>⚡ Fishing Upgrades</h3>
+ <p style="font-size:14px;color:#ccc;margin-bottom:20px;">"Make fishing easier with these upgrades!"</p>
  
  <button id="buyBiggerButton">
-   <div style="font-weight:bold;color:white">Bigger Button</div>
+   <div style="font-weight:bold;color:white">🎯 Bigger Button</div>
    <div class="upgrade-desc">Fish button appears 50% larger</div>
    <div style="font-size:12px;color:gold">Price: $5,000</div>
  </button><br>
  
  <button id="buyFasterFishing">
-   <div style="font-weight:bold;color:white">Faster Fishing</div>
+   <div style="font-weight:bold;color:white">⚡ Faster Fishing</div>
    <div class="upgrade-desc">1.5 seconds to tap button (instead of 1)</div>
    <div style="font-size:12px;color:gold">Price: $10,000</div>
  </button><br>
  
  <button id="buyAutoTap">
-   <div style="font-weight:bold;color:white">Auto-Tap (Coming Soon)</div>
+   <div style="font-weight:bold;color:white">🤖 Auto-Tap (Coming Soon)</div>
    <div class="upgrade-desc">Automatically taps some buttons for you</div>
    <div style="font-size:12px;color:silver">Price: $25,000</div>
  </button><br>
  
  <br>
- <button onclick="upgradesShop.style.display='none'">CLOSE</button>
+ <button onclick="upgradesShop.style.display='none'" style="background:linear-gradient(to right, #f44336, #d32f2f)">CLOSE</button>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/controls/OrbitControls.js"></script>
 <script>
-/* ===== SCENE ===== */
-const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x87CEEB);
+/* ===== ENHANCED SCENE ===== */
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0x87CEEB, 50, 500);
 
-const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.1,1000);
-const renderer=new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(innerWidth,innerHeight);
-renderer.setPixelRatio(devicePixelRatio);
+const camera = new THREE.PerspectiveCamera(75, innerWidth/innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ 
+  antialias: true,
+  alpha: true 
+});
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
 
-scene.add(new THREE.AmbientLight(0xffffff,.7));
-const sun=new THREE.DirectionalLight(0xffffff,1);
-sun.position.set(10,20,10);
-sun.castShadow=true;
+/* ENHANCED LIGHTING */
+scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+
+const sun = new THREE.DirectionalLight(0xffffff, 1.2);
+sun.position.set(50, 100, 50);
+sun.castShadow = true;
+sun.shadow.mapSize.width = 2048;
+sun.shadow.mapSize.height = 2048;
+sun.shadow.camera.left = -100;
+sun.shadow.camera.right = 100;
+sun.shadow.camera.top = 100;
+sun.shadow.camera.bottom = -100;
+sun.shadow.camera.near = 0.5;
+sun.shadow.camera.far = 500;
 scene.add(sun);
 
-/* BLUE UNDERGROUND */
-const undergroundGeo=new THREE.PlaneGeometry(2000,2000,1,1);
-const undergroundMat=new THREE.MeshStandardMaterial({color:0x1e90ff,side:THREE.DoubleSide});
-const underground=new THREE.Mesh(undergroundGeo,undergroundMat);
-underground.rotation.x=-Math.PI/2;
-underground.position.y=-1;
-scene.add(underground);
+// Add fill light
+const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
+fillLight.position.set(-50, 50, -50);
+scene.add(fillLight);
 
-/* ISLAND */
-const islandGeo=new THREE.CylinderGeometry(18,22,2,64);
-const islandMat=new THREE.MeshStandardMaterial({color:0x2e8b57,roughness:.8,metalness:.1});
-const island=new THREE.Mesh(islandGeo,islandMat);
-island.position.set(0,1,0);
+// Add rim light
+const rimLight = new THREE.DirectionalLight(0xffffff, 0.2);
+rimLight.position.set(0, 50, -100);
+scene.add(rimLight);
+
+/* ENHANCED OCEAN */
+const oceanGeometry = new THREE.PlaneGeometry(5000, 5000, 128, 128);
+const oceanMaterial = new THREE.MeshStandardMaterial({
+  color: 0x1e90ff,
+  roughness: 0.1,
+  metalness: 0.9,
+  side: THREE.DoubleSide
+});
+const ocean = new THREE.Mesh(oceanGeometry, oceanMaterial);
+ocean.rotation.x = -Math.PI / 2;
+ocean.position.y = -1;
+ocean.receiveShadow = true;
+scene.add(ocean);
+
+// Create ocean waves
+const oceanUniforms = {
+  time: { value: 0 }
+};
+const oceanVertexShader = `
+  uniform float time;
+  varying vec2 vUv;
+  varying vec3 vPosition;
+  
+  void main() {
+    vUv = uv;
+    vPosition = position;
+    
+    vec3 pos = position;
+    float wave = sin(pos.x * 0.1 + time) * sin(pos.y * 0.1 + time) * 0.5;
+    pos.z += wave;
+    
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+  }
+`;
+
+const oceanFragmentShader = `
+  varying vec2 vUv;
+  varying vec3 vPosition;
+  
+  void main() {
+    float depth = smoothstep(0.0, 1.0, vPosition.z + 0.5);
+    vec3 color = mix(vec3(0.12, 0.56, 1.0), vec3(0.0, 0.2, 0.8), depth);
+    
+    // Add some sparkle
+    float sparkle = sin(vPosition.x * 20.0) * sin(vPosition.y * 20.0);
+    sparkle = max(0.0, sparkle);
+    color += sparkle * 0.1;
+    
+    gl_FragColor = vec4(color, 0.9);
+  }
+`;
+
+/* ENHANCED ISLAND */
+const islandGeometry = new THREE.CylinderGeometry(20, 25, 3, 64);
+const islandMaterial = new THREE.MeshStandardMaterial({
+  color: 0x228b22,
+  roughness: 0.7,
+  metalness: 0.1
+});
+const island = new THREE.Mesh(islandGeometry, islandMaterial);
+island.position.set(0, 1.5, 0);
+island.castShadow = true;
+island.receiveShadow = true;
 scene.add(island);
 
-/* ===== FISHERMAN NPC ===== */
-const fisherman = new THREE.Group();
-fisherman.position.set(-5, 1, 5);
+// Add island detail
+const islandDetailGeometry = new THREE.CylinderGeometry(19, 24, 0.5, 64);
+const islandDetailMaterial = new THREE.MeshStandardMaterial({
+  color: 0x32cd32,
+  roughness: 0.8,
+  metalness: 0
+});
+const islandDetail = new THREE.Mesh(islandDetailGeometry, islandDetailMaterial);
+islandDetail.position.set(0, 2.75, 0);
+islandDetail.castShadow = true;
+islandDetail.receiveShadow = true;
+scene.add(islandDetail);
 
-// Fisherman body
+/* ===== ENHANCED FISHERMAN NPC ===== */
+const fisherman = new THREE.Group();
+fisherman.position.set(-8, 2, 8);
+
+// Enhanced fisherman body
 const body = new THREE.Mesh(
-  new THREE.CylinderGeometry(0.5, 0.5, 1.5, 8),
-  new THREE.MeshStandardMaterial({ color: 0x8b4513 })
+  new THREE.CylinderGeometry(0.6, 0.6, 1.8, 12),
+  new THREE.MeshStandardMaterial({ 
+    color: 0x8b4513,
+    roughness: 0.8,
+    metalness: 0.1
+  })
 );
-body.position.y = 0.75;
+body.position.y = 0.9;
 body.castShadow = true;
 fisherman.add(body);
 
-// Fisherman head
+// Enhanced fisherman head
 const head = new THREE.Mesh(
-  new THREE.SphereGeometry(0.4, 8, 8),
-  new THREE.MeshStandardMaterial({ color: 0xf0c8a0 })
+  new THREE.SphereGeometry(0.5, 16, 16),
+  new THREE.MeshStandardMaterial({ 
+    color: 0xf0c8a0,
+    roughness: 0.7,
+    metalness: 0
+  })
 );
-head.position.y = 1.9;
+head.position.y = 2.2;
 head.castShadow = true;
 fisherman.add(head);
 
-// Fisherman hat
+// Enhanced fisherman hat
 const hat = new THREE.Mesh(
-  new THREE.ConeGeometry(0.6, 0.3, 8),
-  new THREE.MeshStandardMaterial({ color: 0x8b0000 })
+  new THREE.ConeGeometry(0.8, 0.4, 12),
+  new THREE.MeshStandardMaterial({ 
+    color: 0x8b0000,
+    roughness: 0.6,
+    metalness: 0
+  })
 );
-hat.position.y = 2.1;
+hat.position.y = 2.6;
 hat.rotation.x = Math.PI / 8;
 fisherman.add(hat);
 
-// Fishing rod in fisherman's hand
+// Enhanced fishing rod
 const npcRod = new THREE.Mesh(
-  new THREE.CylinderGeometry(0.03, 0.03, 2, 4),
-  new THREE.MeshStandardMaterial({ color: 0x8b4513 })
+  new THREE.CylinderGeometry(0.04, 0.04, 2.5, 8),
+  new THREE.MeshStandardMaterial({ 
+    color: 0x8b4513,
+    roughness: 0.5,
+    metalness: 0.2
+  })
 );
-npcRod.position.set(0.5, 1.2, -0.5);
+npcRod.position.set(0.7, 1.5, -0.6);
 npcRod.rotation.z = Math.PI / 6;
 fisherman.add(npcRod);
 
-// Fishing line
-const fishingLine = new THREE.Mesh(
-  new THREE.CylinderGeometry(0.005, 0.005, 1.5, 4),
-  new THREE.MeshBasicMaterial({ color: 0xffffff })
-);
-fishingLine.position.set(0.8, 0.5, -1.2);
-fishingLine.rotation.z = Math.PI / 3;
-fisherman.add(fishingLine);
-
-// Chair for fisherman
-const chair = new THREE.Mesh(
-  new THREE.BoxGeometry(1, 0.1, 1),
-  new THREE.MeshStandardMaterial({ color: 0x654321 })
-);
-chair.position.set(0, 0.3, 0);
-fisherman.add(chair);
-
-// Chair legs
-for(let i = 0; i < 4; i++){
-  const leg = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.05, 0.05, 0.3, 4),
-    new THREE.MeshStandardMaterial({ color: 0x654321 })
-  );
-  const angle = (i * Math.PI / 2) + Math.PI / 4;
-  leg.position.set(Math.cos(angle) * 0.4, 0.15, Math.sin(angle) * 0.4);
-  fisherman.add(leg);
-}
-
 scene.add(fisherman);
 
-/* ===== UPGRADES NPC ===== */
+/* ===== ENHANCED UPGRADES NPC ===== */
 const upgradesNPC = new THREE.Group();
-upgradesNPC.position.set(5, 1, -5);
+upgradesNPC.position.set(8, 2, -8);
 
-// Upgrades NPC body
+// Enhanced upgrades NPC body
 const upgradesBody = new THREE.Mesh(
-  new THREE.CylinderGeometry(0.5, 0.5, 1.5, 8),
-  new THREE.MeshStandardMaterial({ color: 0x2e8b57 })
+  new THREE.CylinderGeometry(0.6, 0.6, 1.8, 12),
+  new THREE.MeshStandardMaterial({ 
+    color: 0x2e8b57,
+    roughness: 0.8,
+    metalness: 0.1
+  })
 );
-upgradesBody.position.y = 0.75;
+upgradesBody.position.y = 0.9;
 upgradesBody.castShadow = true;
 upgradesNPC.add(upgradesBody);
 
-// Upgrades NPC head
+// Enhanced upgrades NPC head
 const upgradesHead = new THREE.Mesh(
-  new THREE.SphereGeometry(0.4, 8, 8),
-  new THREE.MeshStandardMaterial({ color: 0xf0c8a0 })
+  new THREE.SphereGeometry(0.5, 16, 16),
+  new THREE.MeshStandardMaterial({ 
+    color: 0xf0c8a0,
+    roughness: 0.7,
+    metalness: 0
+  })
 );
-upgradesHead.position.y = 1.9;
+upgradesHead.position.y = 2.2;
 upgradesHead.castShadow = true;
 upgradesNPC.add(upgradesHead);
 
-// Wizard hat for upgrades NPC
+// Enhanced wizard hat
 const wizardHat = new THREE.Mesh(
-  new THREE.ConeGeometry(0.7, 0.8, 8),
-  new THREE.MeshStandardMaterial({ color: 0x4b0082 })
+  new THREE.ConeGeometry(0.9, 1.0, 12),
+  new THREE.MeshStandardMaterial({ 
+    color: 0x4b0082,
+    roughness: 0.5,
+    metalness: 0.3
+  })
 );
-wizardHat.position.y = 2.3;
+wizardHat.position.y = 2.8;
 upgradesNPC.add(wizardHat);
 
-// Magic staff
+// Enhanced magical staff
 const staff = new THREE.Mesh(
-  new THREE.CylinderGeometry(0.03, 0.03, 2.5, 4),
-  new THREE.MeshStandardMaterial({ color: 0x800080 })
+  new THREE.CylinderGeometry(0.05, 0.05, 3.0, 8),
+  new THREE.MeshStandardMaterial({ 
+    color: 0x800080,
+    roughness: 0.3,
+    metalness: 0.7
+  })
 );
-staff.position.set(0.6, 1, 0.3);
+staff.position.set(0.8, 1.2, 0.4);
 staff.rotation.z = -Math.PI / 8;
 upgradesNPC.add(staff);
 
-// Crystal on staff
+// Enhanced crystal with glow
 const crystal = new THREE.Mesh(
-  new THREE.SphereGeometry(0.1, 8, 8),
+  new THREE.OctahedronGeometry(0.15, 2),
   new THREE.MeshStandardMaterial({ 
     color: 0x00ffff,
     emissive: 0x00ffff,
-    emissiveIntensity: 0.5
+    emissiveIntensity: 0.8,
+    roughness: 0.1,
+    metalness: 0.9
   })
 );
-crystal.position.set(0.8, 2, 0.5);
+crystal.position.set(1.0, 2.4, 0.6);
 upgradesNPC.add(crystal);
 
-// Table for upgrades NPC
-const table = new THREE.Mesh(
-  new THREE.CylinderGeometry(1, 1.2, 0.1, 8),
-  new THREE.MeshStandardMaterial({ color: 0x8b4513 })
-);
-table.position.set(0, 0.3, 0);
-upgradesNPC.add(table);
+// Add crystal glow
+const crystalGlow = new THREE.PointLight(0x00ffff, 1, 5);
+crystalGlow.position.copy(crystal.position);
+upgradesNPC.add(crystalGlow);
 
 scene.add(upgradesNPC);
 
-/* ===== DENSE ISLAND VEGETATION ===== */
+/* ===== 3D FISH MODELS ===== */
+const fishModels = {};
+
+// Clownfish
+const clownfishGeometry = new THREE.ConeGeometry(0.5, 1.5, 8);
+clownfishGeometry.rotateX(Math.PI / 2);
+const clownfishMaterial = new THREE.MeshStandardMaterial({
+  color: 0xFF6B35,
+  roughness: 0.4,
+  metalness: 0.2
+});
+fishModels.Clownfish = new THREE.Mesh(clownfishGeometry, clownfishMaterial);
+
+// Tuna
+const tunaGeometry = new THREE.CapsuleGeometry(0.3, 1.2, 4, 8);
+tunaGeometry.rotateZ(Math.PI / 2);
+const tunaMaterial = new THREE.MeshStandardMaterial({
+  color: 0x4682B4,
+  roughness: 0.3,
+  metalness: 0.3
+});
+fishModels.Tuna = new THREE.Mesh(tunaGeometry, tunaMaterial);
+
+// Shark
+const sharkGeometry = new THREE.ConeGeometry(0.4, 2.0, 8);
+sharkGeometry.rotateX(Math.PI / 2);
+const sharkMaterial = new THREE.MeshStandardMaterial({
+  color: 0x708090,
+  roughness: 0.5,
+  metalness: 0.1
+});
+fishModels.Shark = new THREE.Mesh(sharkGeometry, sharkMaterial);
+
+// Pufferfish
+const pufferfishGeometry = new THREE.SphereGeometry(0.6, 16, 16);
+const pufferfishMaterial = new THREE.MeshStandardMaterial({
+  color: 0x32CD32,
+  roughness: 0.7,
+  metalness: 0
+});
+fishModels.Pufferfish = new THREE.Mesh(pufferfishGeometry, pufferfishMaterial);
+
+// Sea Turtle
+const turtleGeometry = new THREE.BoxGeometry(1.2, 0.4, 1.5);
+const turtleMaterial = new THREE.MeshStandardMaterial({
+  color: 0x228B22,
+  roughness: 0.6,
+  metalness: 0
+});
+fishModels.SeaTurtle = new THREE.Mesh(turtleGeometry, turtleMaterial);
+
+// Manta Ray
+const mantaGeometry = new THREE.ConeGeometry(1.5, 0.3, 4);
+mantaGeometry.rotateX(Math.PI / 2);
+const mantaMaterial = new THREE.MeshStandardMaterial({
+  color: 0x483D8B,
+  roughness: 0.4,
+  metalness: 0.2
+});
+fishModels.MantaRay = new THREE.Mesh(mantaGeometry, mantaMaterial);
+
+// Great White Shark
+const greatWhiteGeometry = new THREE.ConeGeometry(0.6, 3.0, 12);
+greatWhiteGeometry.rotateX(Math.PI / 2);
+const greatWhiteMaterial = new THREE.MeshStandardMaterial({
+  color: 0xFFFFFF,
+  roughness: 0.3,
+  metalness: 0.4
+});
+fishModels.GreatWhiteShark = new THREE.Mesh(greatWhiteGeometry, greatWhiteMaterial);
+
+// Terrorshark
+const terrorsharkGeometry = new THREE.ConeGeometry(0.8, 3.5, 12);
+terrorsharkGeometry.rotateX(Math.PI / 2);
+const terrorsharkMaterial = new THREE.MeshStandardMaterial({
+  color: 0xFF0000,
+  emissive: 0x660000,
+  emissiveIntensity: 0.3,
+  roughness: 0.2,
+  metalness: 0.5
+});
+fishModels.Terrorshark = new THREE.Mesh(terrorsharkGeometry, terrorsharkMaterial);
+
+// Megalodon
+const megalodonGeometry = new THREE.ConeGeometry(1.2, 5.0, 16);
+megalodonGeometry.rotateX(Math.PI / 2);
+const megalodonMaterial = new THREE.MeshStandardMaterial({
+  color: 0x2F4F4F,
+  roughness: 0.4,
+  metalness: 0.3
+});
+fishModels.Megalodon = new THREE.Mesh(megalodonGeometry, megalodonMaterial);
+
+// Kraken
+const krakenGeometry = new THREE.SphereGeometry(1.0, 32, 32);
+for(let i = 0; i < 8; i++) {
+  const tentacle = new THREE.ConeGeometry(0.2, 3.0, 8);
+  tentacle.rotateX(Math.PI / 2);
+  const tentacleMesh = new THREE.Mesh(tentacle, new THREE.MeshStandardMaterial({
+    color: 0x8B0000,
+    roughness: 0.5
+  }));
+  tentacleMesh.position.set(
+    Math.cos(i * Math.PI / 4) * 1.2,
+    0,
+    Math.sin(i * Math.PI / 4) * 1.2
+  );
+  krakenGeometry.merge(tentacleMesh.geometry, tentacleMesh.matrix);
+}
+const krakenMaterial = new THREE.MeshStandardMaterial({
+  color: 0x8B0000,
+  emissive: 0x330000,
+  emissiveIntensity: 0.2,
+  roughness: 0.6,
+  metalness: 0.2
+});
+fishModels.Kraken = new THREE.Mesh(krakenGeometry, krakenMaterial);
+
+// Make all fish cast shadows
+Object.values(fishModels).forEach(fish => {
+  fish.castShadow = true;
+  fish.receiveShadow = true;
+});
+
+/* ===== ENHANCED VEGETATION ===== */
 const vegetation = new THREE.Group();
 
-/* ---------- TREE ---------- */
-function createTree(scale=1){
+// Enhanced tree
+function createTree(x, z, scale = 1) {
   const tree = new THREE.Group();
-
-  // Trunk
+  
+  // Enhanced trunk
   const trunk = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.25*scale, 0.4*scale, 6*scale, 8),
-    new THREE.MeshStandardMaterial({ color: 0x8b5a2b, roughness: 0.9 })
+    new THREE.CylinderGeometry(0.4*scale, 0.6*scale, 8*scale, 12),
+    new THREE.MeshStandardMaterial({ 
+      color: 0x8b5a2b, 
+      roughness: 0.9,
+      metalness: 0.1
+    })
   );
-  trunk.position.y = 3*scale;
+  trunk.position.y = 4*scale;
   trunk.castShadow = true;
   tree.add(trunk);
-
-  // Leaves layers
-  const leafMat = new THREE.MeshStandardMaterial({
-    color: new THREE.Color().setHSL(0.32, 0.7, 0.35 + Math.random()*0.1),
-    roughness: 0.7
-  });
-
-  for(let i=0;i<4;i++){
+  
+  // Enhanced leaves
+  const leafColors = [
+    0x228B22, 0x32CD32, 0x3CB371
+  ];
+  
+  for(let i = 0; i < 5; i++) {
     const leaves = new THREE.Mesh(
-      new THREE.ConeGeometry(2.6*scale - i*0.5, 2.5*scale, 10),
-      leafMat
+      new THREE.ConeGeometry(3.0*scale - i*0.5, 3.0*scale, 12),
+      new THREE.MeshStandardMaterial({
+        color: leafColors[Math.floor(Math.random() * leafColors.length)],
+        roughness: 0.8,
+        metalness: 0
+      })
     );
-    leaves.position.y = 5.5*scale + i*1.1*scale;
+    leaves.position.y = 7*scale + i*1.5*scale;
     leaves.castShadow = true;
     tree.add(leaves);
   }
-
-  tree.rotation.y = Math.random()*Math.PI*2;
+  
+  tree.position.set(x, 1.5, z);
+  tree.rotation.y = Math.random() * Math.PI * 2;
   return tree;
 }
 
-/* ---------- BUSH ---------- */
-function createBush(){
-  const bush = new THREE.Mesh(
-    new THREE.SphereGeometry(1.2 + Math.random()*0.5, 8, 8),
-    new THREE.MeshStandardMaterial({
-      color: new THREE.Color().setHSL(0.3, 0.6, 0.35),
-      roughness: 0.8
-    })
-  );
-  bush.scale.y = 0.7;
-  bush.castShadow = true;
+// Enhanced bush
+function createBush(x, z) {
+  const bush = new THREE.Group();
+  const bushCount = 3 + Math.floor(Math.random() * 4);
+  
+  for(let i = 0; i < bushCount; i++) {
+    const bushPart = new THREE.Mesh(
+      new THREE.SphereGeometry(0.8 + Math.random() * 0.4, 12, 12),
+      new THREE.MeshStandardMaterial({
+        color: new THREE.Color().setHSL(0.3, 0.7, 0.3 + Math.random() * 0.1),
+        roughness: 0.9,
+        metalness: 0
+      })
+    );
+    bushPart.position.set(
+      (Math.random() - 0.5) * 2,
+      Math.random() * 0.5,
+      (Math.random() - 0.5) * 2
+    );
+    bushPart.castShadow = true;
+    bush.add(bushPart);
+  }
+  
+  bush.position.set(x, 1.5, z);
   return bush;
 }
 
-/* ---------- PLACEMENT ---------- */
-function placeVegetation(countTrees, countBushes){
-  // Avoid placing vegetation too close to NPCs
-  for(let i=0;i<countTrees;i++){
-    const angle = Math.random()*Math.PI*2;
-    const radius = 8 + Math.random()*12;
-
-    const tree = createTree(0.9 + Math.random()*0.6);
-    tree.position.set(
-      Math.cos(angle)*radius,
-      1,
-      Math.sin(angle)*radius
-    );
-    
-    // Check distance from both NPCs
-    const distFromFisherman = Math.sqrt(
-      Math.pow(tree.position.x - fisherman.position.x, 2) +
-      Math.pow(tree.position.z - fisherman.position.z, 2)
-    );
-    
-    const distFromUpgradesNPC = Math.sqrt(
-      Math.pow(tree.position.x - upgradesNPC.position.x, 2) +
-      Math.pow(tree.position.z - upgradesNPC.position.z, 2)
-    );
-    
-    if(distFromFisherman > 3 && distFromUpgradesNPC > 3){
-      vegetation.add(tree);
-    }else{
-      i--;
-    }
-  }
-
-  for(let i=0;i<countBushes;i++){
-    const angle = Math.random()*Math.PI*2;
-    const radius = 6 + Math.random()*14;
-
-    const bush = createBush();
-    bush.position.set(
-      Math.cos(angle)*radius,
-      1,
-      Math.sin(angle)*radius
-    );
-    
-    const distFromFisherman = Math.sqrt(
-      Math.pow(bush.position.x - fisherman.position.x, 2) +
-      Math.pow(bush.position.z - fisherman.position.z, 2)
-    );
-    
-    const distFromUpgradesNPC = Math.sqrt(
-      Math.pow(bush.position.x - upgradesNPC.position.x, 2) +
-      Math.pow(bush.position.z - upgradesNPC.position.z, 2)
-    );
-    
-    if(distFromFisherman > 2.5 && distFromUpgradesNPC > 2.5){
-      vegetation.add(bush);
-    }else{
-      i--;
-    }
+// Place vegetation
+for(let i = 0; i < 15; i++) {
+  const angle = Math.random() * Math.PI * 2;
+  const radius = 10 + Math.random() * 15;
+  const tree = createTree(
+    Math.cos(angle) * radius,
+    Math.sin(angle) * radius,
+    0.8 + Math.random() * 0.4
+  );
+  
+  const distFromFisherman = Math.sqrt(
+    Math.pow(tree.position.x - fisherman.position.x, 2) +
+    Math.pow(tree.position.z - fisherman.position.z, 2)
+  );
+  
+  const distFromUpgradesNPC = Math.sqrt(
+    Math.pow(tree.position.x - upgradesNPC.position.x, 2) +
+    Math.pow(tree.position.z - upgradesNPC.position.z, 2)
+  );
+  
+  if(distFromFisherman > 5 && distFromUpgradesNPC > 5) {
+    vegetation.add(tree);
   }
 }
 
-/* ---------- DENSITY ---------- */
-placeVegetation(22, 28);
+for(let i = 0; i < 25; i++) {
+  const angle = Math.random() * Math.PI * 2;
+  const radius = 5 + Math.random() * 20;
+  const bush = createBush(
+    Math.cos(angle) * radius,
+    Math.sin(angle) * radius
+  );
+  
+  const distFromFisherman = Math.sqrt(
+    Math.pow(bush.position.x - fisherman.position.x, 2) +
+    Math.pow(bush.position.z - fisherman.position.z, 2)
+  );
+  
+  const distFromUpgradesNPC = Math.sqrt(
+    Math.pow(bush.position.x - upgradesNPC.position.x, 2) +
+    Math.pow(bush.position.z - upgradesNPC.position.z, 2)
+  );
+  
+  if(distFromFisherman > 4 && distFromUpgradesNPC > 4) {
+    vegetation.add(bush);
+  }
+}
+
 scene.add(vegetation);
 
+/* ===== WATER EFFECTS ===== */
+const waterCanvas = document.getElementById('waterCanvas');
+const waterCtx = waterCanvas.getContext('2d');
+waterCanvas.width = window.innerWidth;
+waterCanvas.height = window.innerHeight;
+
+const waterDrops = [];
+class WaterDrop {
+  constructor() {
+    this.x = Math.random() * waterCanvas.width;
+    this.y = Math.random() * waterCanvas.height;
+    this.size = Math.random() * 3 + 1;
+    this.speed = Math.random() * 2 + 1;
+    this.opacity = Math.random() * 0.5 + 0.3;
+  }
+  
+  update() {
+    this.y += this.speed;
+    if(this.y > waterCanvas.height) {
+      this.y = 0;
+      this.x = Math.random() * waterCanvas.width;
+    }
+  }
+  
+  draw() {
+    waterCtx.beginPath();
+    waterCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    waterCtx.fillStyle = `rgba(173, 216, 230, ${this.opacity})`;
+    waterCtx.fill();
+  }
+}
+
+for(let i = 0; i < 100; i++) {
+  waterDrops.push(new WaterDrop());
+}
+
+function animateWater() {
+  waterCtx.clearRect(0, 0, waterCanvas.width, waterCanvas.height);
+  
+  waterDrops.forEach(drop => {
+    drop.update();
+    drop.draw();
+  });
+  
+  requestAnimationFrame(animateWater);
+}
+animateWater();
+
+window.addEventListener('resize', () => {
+  waterCanvas.width = window.innerWidth;
+  waterCanvas.height = window.innerHeight;
+});
+
 /* PLAYER */
-const player=new THREE.Object3D();
+const player = new THREE.Object3D();
 scene.add(player);
-player.position.set(0,3,0);
+player.position.set(0, 4, 0);
 player.add(camera);
 
-let velocityY=0,grounded=true;
-let yaw=0,pitch=0;
+let velocityY = 0, grounded = true;
+let yaw = 0, pitch = 0;
 
 /* CAMERA LOOK */
-let looking=false,lastX=0,lastY=0;
-addEventListener("touchstart",e=>{
- if(e.target.closest(".slot")||e.target.id==="joystick"||e.target.id==="stick"||e.target.id==="jump"||e.target.id==="book"||e.target.closest("#shop")||e.target.closest("#upgradesShop")||e.target.closest("#rules")||e.target.closest("#login"))return;
- looking=true;
- lastX=e.touches[0].clientX;
- lastY=e.touches[0].clientY;
+let looking = false, lastX = 0, lastY = 0;
+addEventListener("touchstart", e => {
+ if(e.target.closest(".slot") || e.target.id === "joystick" || 
+    e.target.id === "stick" || e.target.id === "jump" || 
+    e.target.id === "book" || e.target.closest("#shop") || 
+    e.target.closest("#upgradesShop") || e.target.closest("#rules") || 
+    e.target.closest("#login") || e.target.closest("#fishPreview")) return;
+ looking = true;
+ lastX = e.touches[0].clientX;
+ lastY = e.touches[0].clientY;
 });
-addEventListener("touchmove",e=>{
- if(!looking)return;
- yaw-=(e.touches[0].clientX-lastX)*.004;
- pitch-=(e.touches[0].clientY-lastY)*.004;
- pitch=Math.max(-1.4,Math.min(1.4,pitch));
- lastX=e.touches[0].clientX;
- lastY=e.touches[0].clientY;
+addEventListener("touchmove", e => {
+ if(!looking) return;
+ yaw -= (e.touches[0].clientX - lastX) * 0.003;
+ pitch -= (e.touches[0].clientY - lastY) * 0.003;
+ pitch = Math.max(-1.4, Math.min(1.4, pitch));
+ lastX = e.touches[0].clientX;
+ lastY = e.touches[0].clientY;
 });
-addEventListener("touchend",()=>looking=false);
+addEventListener("touchend", () => looking = false);
 
 /* MOVE */
-let moveX=0,moveZ=0,joy=false,center={};
-joystick.addEventListener("touchstart",()=>{
- joy=true;
- const r=joystick.getBoundingClientRect();
- center={x:r.left+r.width/2,y:r.top+r.height/2};
+let moveX = 0, moveZ = 0, joy = false, center = {};
+joystick.addEventListener("touchstart", () => {
+ joy = true;
+ const r = joystick.getBoundingClientRect();
+ center = {x: r.left + r.width/2, y: r.top + r.height/2};
 });
-addEventListener("touchmove",e=>{
- if(!joy)return;
- let dx=e.touches[0].clientX-center.x;
- let dy=e.touches[0].clientY-center.y;
- dx=Math.max(-40,Math.min(40,dx));
- dy=Math.max(-40,Math.min(40,dy));
- stick.style.left=30+dx+"px";
- stick.style.top=30+dy+"px";
- moveX=dx/40;
- moveZ=dy/40;
+addEventListener("touchmove", e => {
+ if(!joy) return;
+ let dx = e.touches[0].clientX - center.x;
+ let dy = e.touches[0].clientY - center.y;
+ dx = Math.max(-45, Math.min(45, dx));
+ dy = Math.max(-45, Math.min(45, dy));
+ stick.style.left = (35 + dx) + "px";
+ stick.style.top = (35 + dy) + "px";
+ moveX = dx / 45;
+ moveZ = dy / 45;
 });
-addEventListener("touchend",()=>{
- joy=false;
- stick.style.left="30px";
- stick.style.top="30px";
- moveX=moveZ=0;
+addEventListener("touchend", () => {
+ joy = false;
+ stick.style.left = "35px";
+ stick.style.top = "35px";
+ moveX = moveZ = 0;
 });
 
 /* JUMP */
-jump.addEventListener("touchstart",()=>{
- if(grounded){velocityY=.18;grounded=false;}
+jump.addEventListener("touchstart", () => {
+ if(grounded) {
+   velocityY = 0.2;
+   grounded = false;
+ }
 });
 
-/* ===== INVENTORY SYSTEM ===== */
+/* ===== ENHANCED INVENTORY SYSTEM ===== */
 let money = 0;
 const prices = {
-  Clownfish:5, 
-  Tuna:10, 
-  Shark:25, 
-  Pufferfish:25, 
-  SeaTurtle:50, 
-  MantaRay:500, 
-  GreatWhiteShark:1500,
-  Terrorshark:2000,
-  Megalodon:1000,
-  Kraken:5000
+  Clownfish: 5, 
+  Tuna: 10, 
+  Shark: 25, 
+  Pufferfish: 25, 
+  SeaTurtle: 50, 
+  MantaRay: 500, 
+  GreatWhiteShark: 1500,
+  Terrorshark: 2000,
+  Megalodon: 1000,
+  Kraken: 5000
 };
 
 // Start with 9 slots
-let inventory = ["Rod","","","","","","","",""];
+let inventory = ["Rod", "", "", "", "", "", "", "", ""];
 let selected = 0;
 const inv = document.getElementById("inventory");
 let lastTapTime = 0;
 
-/* ===== UPGRADES SYSTEM ===== */
+/* ===== ENHANCED UPGRADES SYSTEM ===== */
 let playerUpgrades = {
-  biggerButton: false,      // Makes fish button 50% larger
-  fasterFishing: false,    // 1.5s time limit instead of 1s
-  autoTap: false          // Coming soon
+  biggerButton: false,
+  fasterFishing: false,
+  autoTap: false
 };
 
 // Parse item stacks
-function parseStack(item){
-  if(!item) return {name:"", count:0};
+function parseStack(item) {
+  if(!item) return {name: "", count: 0};
   const match = item.match(/^(.+)x(\d+)$/);
-  if(match) return {name:match[1], count:parseInt(match[2])};
-  return {name:item, count:1};
+  if(match) return {name: match[1], count: parseInt(match[2])};
+  return {name: item, count: 1};
 }
 
 // Add item with stacking logic
-function addItem(fishName){
+function addItem(fishName) {
   const maxStack = 99;
   // Try to stack first
-  for(let i=0;i<inventory.length;i++){
-    const {name,count} = parseStack(inventory[i]);
-    if(name === fishName && count < maxStack){
-      const newCount = Math.min(count+1, maxStack);
-      inventory[i] = fishName + (newCount>1 ? "x"+newCount : "");
+  for(let i = 0; i < inventory.length; i++) {
+    const {name, count} = parseStack(inventory[i]);
+    if(name === fishName && count < maxStack) {
+      const newCount = Math.min(count + 1, maxStack);
+      inventory[i] = fishName + (newCount > 1 ? "x" + newCount : "");
       renderInv();
       return;
     }
   }
   // Find empty slot
-  for(let i=0;i<inventory.length;i++){
-    if(inventory[i]===""){
+  for(let i = 0; i < inventory.length; i++) {
+    if(inventory[i] === "") {
       inventory[i] = fishName;
       renderInv();
       return;
@@ -647,120 +1066,186 @@ function addItem(fishName){
   alert("Inventory full!");
 }
 
-// Tap handling (preview / sell)
-function slotTap(index){
-  const {name,count} = parseStack(inventory[index]);
+// Enhanced tap handling with 3D preview
+function slotTap(index) {
+  const {name, count} = parseStack(inventory[index]);
   selected = index;
   renderInv();
   updateRod();
 
-  if(!name || name==="Rod" || name==="Sun Rod" || name==="Moon Rod" || name==="Ocean Rod") return;
+  if(!name || name === "Rod" || name === "Sun Rod" || name === "Moon Rod" || name === "Ocean Rod") return;
 
   const now = Date.now();
-  if(lastTapTime && now-lastTapTime<500 && selected===index){
+  if(lastTapTime && now - lastTapTime < 500 && selected === index) {
     // Double tap → sell
-    money += (prices[name]||0) * count; // Sell all in stack
+    money += (prices[name] || 0) * count;
     document.getElementById("money").textContent = "$" + money;
     inventory[index] = "";
     renderInv();
     lastTapTime = 0;
     savePlayerData();
-  }else{
-    // Single tap → preview
-    msg.style.display = "block";
-    msg.textContent = name + " (double tap to sell all)";
-    setTimeout(()=>{msg.style.display="none"},1000);
+  } else {
+    // Single tap → show 3D preview
+    showFishPreview(name, count);
     lastTapTime = now;
   }
 }
 
-// Render inventory with scrollable UI
-function renderInv(){
+// Show 3D fish preview
+function showFishPreview(fishName, count) {
+  const previewCanvas = document.getElementById('fishPreviewCanvas');
+  const previewRenderer = new THREE.WebGLRenderer({
+    canvas: previewCanvas,
+    alpha: true,
+    antialias: true
+  });
+  previewRenderer.setSize(200, 200);
+  previewRenderer.setClearColor(0x000000, 0);
+  
+  const previewScene = new THREE.Scene();
+  const previewCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
+  previewCamera.position.z = 5;
+  
+  // Add lights
+  const previewLight1 = new THREE.DirectionalLight(0xffffff, 1);
+  previewLight1.position.set(5, 5, 5);
+  previewScene.add(previewLight1);
+  
+  const previewLight2 = new THREE.DirectionalLight(0xffffff, 0.5);
+  previewLight2.position.set(-5, 5, -5);
+  previewScene.add(previewLight2);
+  
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+  previewScene.add(ambientLight);
+  
+  // Clone fish model
+  const fishModel = fishModels[fishName].clone();
+  previewScene.add(fishModel);
+  
+  // Animate preview
+  let rotationSpeed = 0.01;
+  const animatePreview = () => {
+    fishModel.rotation.y += rotationSpeed;
+    previewRenderer.render(previewScene, previewCamera);
+    if(fishPreview.style.display === 'block') {
+      requestAnimationFrame(animatePreview);
+    }
+  };
+  
+  // Show preview
+  fishPreview.style.display = 'block';
+  document.getElementById('fishStats').innerHTML = `
+    <div style="margin:10px 0;color:gold;font-size:16px">
+      <b>${fishName}</b><br>
+      Quantity: ${count}<br>
+      Value: $${prices[fishName] * count}<br>
+      <small style="color:#ccc">Double tap to sell all</small>
+    </div>
+  `;
+  
+  animatePreview();
+}
+
+// Render enhanced inventory
+function renderInv() {
   inv.innerHTML = "";
-  inventory.forEach((it,i)=>{
+  inventory.forEach((it, i) => {
     const d = document.createElement("div");
-    d.className = "slot"+(i===selected?" active":"");
-    d.textContent = it;
-    d.onclick = ()=>slotTap(i);
+    d.className = "slot" + (i === selected ? " active" : "");
+    
+    const {name, count} = parseStack(it);
+    d.textContent = name;
+    
+    if(count > 1) {
+      const countSpan = document.createElement("span");
+      countSpan.className = "slot-count";
+      countSpan.textContent = count;
+      d.appendChild(countSpan);
+    }
+    
+    d.onclick = () => slotTap(i);
     inv.appendChild(d);
   });
 }
 renderInv();
 
 // Inventory expansion
-function expandInventory(slots=3){
-  for(let i=0;i<slots;i++) inventory.push("");
+function expandInventory(slots = 3) {
+  for(let i = 0; i < slots; i++) inventory.push("");
   renderInv();
   savePlayerData();
 }
 
-/* ROD */
-let rod=null;
-function updateRod(){
+/* ENHANCED ROD */
+let rod = null;
+function updateRod() {
   const currentRod = inventory[selected];
   const rodTypes = ["Rod", "Sun Rod", "Moon Rod", "Ocean Rod"];
   
-  if(rodTypes.includes(currentRod)){
-    if(!rod){
-      rod=new THREE.Mesh(new THREE.CylinderGeometry(.02,.02,1),new THREE.MeshStandardMaterial({color:0x8b4513}));
-      rod.position.set(.3,-.4,-1);
-      rod.rotation.z=Math.PI/4;
+  if(rodTypes.includes(currentRod)) {
+    if(!rod) {
+      rod = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.03, 0.03, 1.2, 8),
+        new THREE.MeshStandardMaterial({color: 0x8b4513})
+      );
+      rod.position.set(0.4, -0.3, -1.2);
+      rod.rotation.z = Math.PI / 3.5;
       camera.add(rod);
     }
     
-    // Set color based on rod type
-    let color;
-    switch(currentRod){
-      case "Sun Rod": color = 0xffcc00; break;
-      case "Moon Rod": color = 0x8a2be2; break;
-      case "Ocean Rod": color = 0x00bfff; break;
-      default: color = 0x8b4513;
+    // Enhanced rod colors
+    let color, emissive;
+    switch(currentRod) {
+      case "Sun Rod": 
+        color = 0xffcc00; 
+        emissive = 0xff9900;
+        break;
+      case "Moon Rod": 
+        color = 0x8a2be2; 
+        emissive = 0x4b0082;
+        break;
+      case "Ocean Rod": 
+        color = 0x00bfff; 
+        emissive = 0x0088cc;
+        break;
+      default: 
+        color = 0x8b4513; 
+        emissive = 0x000000;
     }
+    
     rod.material.color.set(color);
-  }else if(rod){
+    rod.material.emissive = new THREE.Color(emissive);
+    rod.material.emissiveIntensity = currentRod !== "Rod" ? 0.3 : 0;
+  } else if(rod) {
     camera.remove(rod);
-    rod=null;
+    rod = null;
   }
 }
 
 /* NPC CLICKS → SHOPS */
-const raycaster=new THREE.Raycaster();
-const touchVec=new THREE.Vector2();
-addEventListener("touchstart",e=>{
- touchVec.x=(e.touches[0].clientX/innerWidth)*2-1;
- touchVec.y=-(e.touches[0].clientY/innerHeight)*2+1;
- raycaster.setFromCamera(touchVec,camera);
+const raycaster = new THREE.Raycaster();
+const touchVec = new THREE.Vector2();
+addEventListener("touchstart", e => {
+ touchVec.x = (e.touches[0].clientX / innerWidth) * 2 - 1;
+ touchVec.y = -(e.touches[0].clientY / innerHeight) * 2 + 1;
+ raycaster.setFromCamera(touchVec, camera);
  
- // Check if clicking on fisherman
+ // Check if clicking on NPCs
  let hitFisherman = false;
  let hitUpgradesNPC = false;
  
- // Check fisherman
- const fishermanIntersects = raycaster.intersectObjects(fisherman.children, true);
- if(fishermanIntersects.length > 0){
-   hitFisherman = true;
- }
- if(!hitFisherman){
-   const groupIntersects = raycaster.intersectObject(fisherman);
-   if(groupIntersects.length > 0){
+ const intersects = raycaster.intersectObjects([fisherman, upgradesNPC], true);
+ intersects.forEach(intersect => {
+   if(fisherman.children.includes(intersect.object) || intersect.object === fisherman) {
      hitFisherman = true;
    }
- }
- 
- // Check upgrades NPC
- const upgradesIntersects = raycaster.intersectObjects(upgradesNPC.children, true);
- if(upgradesIntersects.length > 0){
-   hitUpgradesNPC = true;
- }
- if(!hitUpgradesNPC){
-   const groupIntersects = raycaster.intersectObject(upgradesNPC);
-   if(groupIntersects.length > 0){
+   if(upgradesNPC.children.includes(intersect.object) || intersect.object === upgradesNPC) {
      hitUpgradesNPC = true;
    }
- }
+ });
  
- if(hitFisherman){
-   shop.style.display="block";
+ if(hitFisherman) {
+   shop.style.display = "block";
    const dialogues = [
      "Welcome back! Need some gear?",
      "Ah, a fellow angler! What can I get you?",
@@ -771,8 +1256,8 @@ addEventListener("touchstart",e=>{
    document.querySelector("#shop p").textContent = `"${randomDialogue}"`;
  }
  
- if(hitUpgradesNPC){
-   upgradesShop.style.display="block";
+ if(hitUpgradesNPC) {
+   upgradesShop.style.display = "block";
    const dialogues = [
      "Seeking power? I have just what you need!",
      "Enhance your fishing with my magical upgrades!",
@@ -781,55 +1266,28 @@ addEventListener("touchstart",e=>{
    ];
    const randomDialogue = dialogues[Math.floor(Math.random() * dialogues.length)];
    document.querySelector("#upgradesShop p").textContent = `"${randomDialogue}"`;
-   
-   // Update upgrade buttons based on ownership
    updateUpgradeButtons();
  }
 });
 
 /* SHOP BUTTONS */
-document.getElementById('buySunRod').onclick = ()=>{
- if(money<1000)return alert("Not enough money");
- for(let i=0;i<inventory.length;i++){
-  if(inventory[i]==="Rod"||inventory[i]==="Moon Rod"||inventory[i]==="Ocean Rod"){
-    inventory[i]="Sun Rod"; 
+document.getElementById('buySunRod').onclick = () => {
+ if(money < 1000) return alert("Not enough money");
+ for(let i = 0; i < inventory.length; i++) {
+  if(inventory[i] === "Rod" || inventory[i] === "Moon Rod" || inventory[i] === "Ocean Rod") {
+    inventory[i] = "Sun Rod"; 
     renderInv(); 
-    money-=1000; 
-    document.getElementById("money").textContent="$"+money; 
+    money -= 1000; 
+    document.getElementById("money").textContent = "$" + money; 
     savePlayerData();
     return;
   }
  }
- for(let i=0;i<inventory.length;i++){
-  if(inventory[i]===""){
-    inventory[i]="Sun Rod"; 
-    money-=1000; 
-    document.getElementById("money").textContent="$"+money; 
-    renderInv(); 
-    savePlayerData();
-    return;
-  }
- }
- alert("Inventory full!");
-};
-
-document.getElementById('buyMoonRod').onclick = ()=>{
- if(money<10000)return alert("Not enough money");
- for(let i=0;i<inventory.length;i++){
-  if(inventory[i]==="Rod"||inventory[i]==="Sun Rod"||inventory[i]==="Ocean Rod"){
-    inventory[i]="Moon Rod"; 
-    renderInv(); 
-    money-=10000; 
-    document.getElementById("money").textContent="$"+money; 
-    savePlayerData();
-    return;
-  }
- }
- for(let i=0;i<inventory.length;i++){
-  if(inventory[i]===""){
-    inventory[i]="Moon Rod"; 
-    money-=10000; 
-    document.getElementById("money").textContent="$"+money; 
+ for(let i = 0; i < inventory.length; i++) {
+  if(inventory[i] === "") {
+    inventory[i] = "Sun Rod"; 
+    money -= 1000; 
+    document.getElementById("money").textContent = "$" + money; 
     renderInv(); 
     savePlayerData();
     return;
@@ -838,23 +1296,23 @@ document.getElementById('buyMoonRod').onclick = ()=>{
  alert("Inventory full!");
 };
 
-document.getElementById('buyOceanRod').onclick = ()=>{
- if(money<100000)return alert("Not enough money");
- for(let i=0;i<inventory.length;i++){
-  if(inventory[i]==="Rod"||inventory[i]==="Sun Rod"||inventory[i]==="Moon Rod"){
-    inventory[i]="Ocean Rod"; 
+document.getElementById('buyMoonRod').onclick = () => {
+ if(money < 10000) return alert("Not enough money");
+ for(let i = 0; i < inventory.length; i++) {
+  if(inventory[i] === "Rod" || inventory[i] === "Sun Rod" || inventory[i] === "Ocean Rod") {
+    inventory[i] = "Moon Rod"; 
     renderInv(); 
-    money-=100000; 
-    document.getElementById("money").textContent="$"+money; 
+    money -= 10000; 
+    document.getElementById("money").textContent = "$" + money; 
     savePlayerData();
     return;
   }
  }
- for(let i=0;i<inventory.length;i++){
-  if(inventory[i]===""){
-    inventory[i]="Ocean Rod"; 
-    money-=100000; 
-    document.getElementById("money").textContent="$"+money; 
+ for(let i = 0; i < inventory.length; i++) {
+  if(inventory[i] === "") {
+    inventory[i] = "Moon Rod"; 
+    money -= 10000; 
+    document.getElementById("money").textContent = "$" + money; 
     renderInv(); 
     savePlayerData();
     return;
@@ -863,27 +1321,51 @@ document.getElementById('buyOceanRod').onclick = ()=>{
  alert("Inventory full!");
 };
 
-document.getElementById('buyInventory').onclick = ()=>{
-  if(money<500) return alert("Not enough money");
+document.getElementById('buyOceanRod').onclick = () => {
+ if(money < 100000) return alert("Not enough money");
+ for(let i = 0; i < inventory.length; i++) {
+  if(inventory[i] === "Rod" || inventory[i] === "Sun Rod" || inventory[i] === "Moon Rod") {
+    inventory[i] = "Ocean Rod"; 
+    renderInv(); 
+    money -= 100000; 
+    document.getElementById("money").textContent = "$" + money; 
+    savePlayerData();
+    return;
+  }
+ }
+ for(let i = 0; i < inventory.length; i++) {
+  if(inventory[i] === "") {
+    inventory[i] = "Ocean Rod"; 
+    money -= 100000; 
+    document.getElementById("money").textContent = "$" + money; 
+    renderInv(); 
+    savePlayerData();
+    return;
+  }
+ }
+ alert("Inventory full!");
+};
+
+document.getElementById('buyInventory').onclick = () => {
+  if(money < 500) return alert("Not enough money");
   money -= 500;
-  document.getElementById("money").textContent = "$"+money;
+  document.getElementById("money").textContent = "$" + money;
   expandInventory(3);
   savePlayerData();
 };
 
-document.getElementById('openUpgrades').onclick = ()=>{
+document.getElementById('openUpgrades').onclick = () => {
   shop.style.display = "none";
   upgradesShop.style.display = "block";
   updateUpgradeButtons();
 };
 
 /* UPGRADES SHOP BUTTONS */
-function updateUpgradeButtons(){
+function updateUpgradeButtons() {
   const biggerBtn = document.getElementById('buyBiggerButton');
   const fasterBtn = document.getElementById('buyFasterFishing');
-  const autoBtn = document.getElementById('buyAutoTap');
   
-  if(playerUpgrades.biggerButton){
+  if(playerUpgrades.biggerButton) {
     biggerBtn.innerHTML = `
       <div style="font-weight:bold;color:lightgreen">✓ Bigger Button</div>
       <div class="upgrade-desc">Fish button appears 50% larger</div>
@@ -893,7 +1375,7 @@ function updateUpgradeButtons(){
     biggerBtn.style.opacity = "0.7";
   }
   
-  if(playerUpgrades.fasterFishing){
+  if(playerUpgrades.fasterFishing) {
     fasterBtn.innerHTML = `
       <div style="font-weight:bold;color:lightgreen">✓ Faster Fishing</div>
       <div class="upgrade-desc">1.5 seconds to tap button (instead of 1)</div>
@@ -902,27 +1384,9 @@ function updateUpgradeButtons(){
     fasterBtn.disabled = true;
     fasterBtn.style.opacity = "0.7";
   }
-  
-  if(playerUpgrades.autoTap){
-    autoBtn.innerHTML = `
-      <div style="font-weight:bold;color:lightgreen">✓ Auto-Tap</div>
-      <div class="upgrade-desc">Automatically taps some buttons for you</div>
-      <div style="font-size:12px;color:lightgreen">PURCHASED</div>
-    `;
-    autoBtn.disabled = true;
-    autoBtn.style.opacity = "0.7";
-  } else {
-    autoBtn.innerHTML = `
-      <div style="font-weight:bold;color:silver">Auto-Tap (Coming Soon)</div>
-      <div class="upgrade-desc">Automatically taps some buttons for you</div>
-      <div style="font-size:12px;color:silver">Price: $25,000</div>
-    `;
-    autoBtn.disabled = true;
-    autoBtn.style.opacity = "0.5";
-  }
 }
 
-document.getElementById('buyBiggerButton').onclick = ()=>{
+document.getElementById('buyBiggerButton').onclick = () => {
   if(playerUpgrades.biggerButton) return;
   if(money < 5000) return alert("Not enough money!");
   
@@ -933,7 +1397,7 @@ document.getElementById('buyBiggerButton').onclick = ()=>{
   msg.style.display = "block";
   msg.textContent = "✓ Bigger Button Purchased!";
   msg.style.color = "lightgreen";
-  setTimeout(()=>{
+  setTimeout(() => {
     msg.style.display = "none";
     msg.style.color = "white";
   }, 2000);
@@ -942,7 +1406,7 @@ document.getElementById('buyBiggerButton').onclick = ()=>{
   savePlayerData();
 };
 
-document.getElementById('buyFasterFishing').onclick = ()=>{
+document.getElementById('buyFasterFishing').onclick = () => {
   if(playerUpgrades.fasterFishing) return;
   if(money < 10000) return alert("Not enough money!");
   
@@ -953,7 +1417,7 @@ document.getElementById('buyFasterFishing').onclick = ()=>{
   msg.style.display = "block";
   msg.textContent = "✓ Faster Fishing Purchased!";
   msg.style.color = "lightgreen";
-  setTimeout(()=>{
+  setTimeout(() => {
     msg.style.display = "none";
     msg.style.color = "white";
   }, 2000);
@@ -962,43 +1426,43 @@ document.getElementById('buyFasterFishing').onclick = ()=>{
   savePlayerData();
 };
 
-/* ===== REACTION-TIME MINI-GAME FISHING ===== */
-let holding=false, holdTime=0, fishing=false, taps=0, requiredTaps=10, fishButton=null, fishTimer=null;
+/* ===== ENHANCED FISHING SYSTEM ===== */
+let holding = false, holdTime = 0, fishing = false, taps = 0, requiredTaps = 10, fishButton = null, fishTimer = null;
 
-addEventListener("touchstart",(e)=>{
+addEventListener("touchstart", (e) => {
   const currentRod = inventory[selected];
-  if(["Rod","Sun Rod","Moon Rod","Ocean Rod"].includes(currentRod)){
-    if(!fishing && !joy && !e.target.closest("#shop") && !e.target.closest("#upgradesShop") && !e.target.closest("#rules")){
-      holding=true; 
-      holdTime=0;
+  if(["Rod", "Sun Rod", "Moon Rod", "Ocean Rod"].includes(currentRod)) {
+    if(!fishing && !joy && !e.target.closest("#shop") && !e.target.closest("#upgradesShop") && !e.target.closest("#rules") && !e.target.closest("#fishPreview")) {
+      holding = true; 
+      holdTime = 0;
     }
   }
 });
-addEventListener("touchend",()=>{holding=false; holdTime=0});
+addEventListener("touchend", () => { holding = false; holdTime = 0; });
 
 // Base probabilities for Basic Rod
 const baseProbabilities = {
-  Kraken: 0.01,          // 1/100
-  Terrorshark: 0.02,     // 1/50
-  Megalodon: 0.02,       // 1/50
-  GreatWhiteShark: 0.01333, // 1/75
-  MantaRay: 0.04,        // 1/25
-  SeaTurtle: 0.20,       // 1/5
-  Pufferfish: 0.3333,    // 1/3
-  Clownfish: 0.2067,     // ~25%
-  Tuna: 0.2067,          // ~25%
-  Shark: 0.4134          // ~50%
+  Kraken: 0.01,
+  Terrorshark: 0.02,
+  Megalodon: 0.02,
+  GreatWhiteShark: 0.01333,
+  MantaRay: 0.04,
+  SeaTurtle: 0.20,
+  Pufferfish: 0.3333,
+  Clownfish: 0.2067,
+  Tuna: 0.2067,
+  Shark: 0.4134
 };
 
-// Rod multiplier system (2x each tier)
+// Rod multiplier system
 const rodMultipliers = {
-  "Rod": 1,      // Base
-  "Sun Rod": 2,  // 2x better
-  "Moon Rod": 4, // 4x better
-  "Ocean Rod": 8 // 8x better
+  "Rod": 1,
+  "Sun Rod": 2,
+  "Moon Rod": 4,
+  "Ocean Rod": 8
 };
 
-function randomFish(currentRod){
+function randomFish(currentRod) {
   const multiplier = rodMultipliers[currentRod] || 1;
   const r = Math.random();
   
@@ -1006,19 +1470,14 @@ function randomFish(currentRod){
   let adjustedProbabilities = {};
   let total = 0;
   
-  // Apply multiplier to rare fish probabilities
-  for(const fish in baseProbabilities){
+  for(const fish in baseProbabilities) {
     let prob = baseProbabilities[fish];
     
-    // Apply multiplier to rare/ultra rare fish only
-    const isRare = ["Kraken","Terrorshark","Megalodon","GreatWhiteShark","MantaRay","SeaTurtle"].includes(fish);
-    if(isRare && multiplier > 1){
-      // Increase rare fish probability
+    const isRare = ["Kraken", "Terrorshark", "Megalodon", "GreatWhiteShark", "MantaRay", "SeaTurtle"].includes(fish);
+    if(isRare && multiplier > 1) {
       prob = prob * multiplier;
-      // Cap at reasonable maximum
       if(prob > 0.5) prob = 0.5;
     } else {
-      // Reduce common fish probability to compensate
       prob = prob / Math.pow(multiplier, 0.5);
     }
     
@@ -1029,61 +1488,68 @@ function randomFish(currentRod){
   // Normalize probabilities
   let cumulative = 0;
   const normalizedProbs = {};
-  for(const fish in adjustedProbabilities){
+  for(const fish in adjustedProbabilities) {
     normalizedProbs[fish] = adjustedProbabilities[fish] / total;
   }
   
-  // Random selection with adjusted probabilities
+  // Random selection
   let rand = Math.random();
-  for(const fish in normalizedProbs){
+  for(const fish in normalizedProbs) {
     cumulative += normalizedProbs[fish];
-    if(rand <= cumulative){
+    if(rand <= cumulative) {
       return fish;
     }
   }
   
-  // Fallback
   return "Shark";
 }
 
-function createFishButton(){
+// Enhanced fish button
+function createFishButton() {
  if(fishButton) document.body.removeChild(fishButton);
- fishButton=document.createElement("button");
- fishButton.textContent="PRESS HERE!";
- fishButton.style.position="fixed";
- fishButton.style.zIndex="200";
- fishButton.style.borderRadius="12px";
- fishButton.style.background="linear-gradient(45deg, #ffd700, #ffed4e)";
- fishButton.style.color="black";
- fishButton.style.border="4px solid red";
- fishButton.style.fontWeight="bold";
- fishButton.style.boxShadow="0 0 20px rgba(255, 215, 0, 0.7)";
+ fishButton = document.createElement("button");
+ fishButton.textContent = "🎯 PRESS HERE! 🎯";
+ fishButton.style.position = "fixed";
+ fishButton.style.zIndex = "200";
+ fishButton.style.borderRadius = "15px";
+ fishButton.style.background = "linear-gradient(45deg, #ff6b6b, #ffd93d, #6bcf7f)";
+ fishButton.style.color = "black";
+ fishButton.style.border = "4px solid #ff4757";
+ fishButton.style.fontWeight = "bold";
+ fishButton.style.boxShadow = "0 0 30px rgba(255, 107, 107, 0.8)";
+ fishButton.style.textShadow = "1px 1px 2px white";
  
  // Apply Bigger Button upgrade
- if(playerUpgrades.biggerButton){
-   fishButton.style.padding="20px 30px";
-   fishButton.style.fontSize="24px";
+ if(playerUpgrades.biggerButton) {
+   fishButton.style.padding = "25px 40px";
+   fishButton.style.fontSize = "28px";
  } else {
-   fishButton.style.padding="12px 20px";
-   fishButton.style.fontSize="18px";
+   fishButton.style.padding = "15px 30px";
+   fishButton.style.fontSize = "22px";
  }
  
- const x=Math.random()*(window.innerWidth-200)+100;
- const y=Math.random()*(window.innerHeight-100)+50;
- fishButton.style.left=x+"px";
- fishButton.style.top=y+"px";
+ const x = Math.random() * (window.innerWidth - 300) + 150;
+ const y = Math.random() * (window.innerHeight - 150) + 75;
+ fishButton.style.left = x + "px";
+ fishButton.style.top = y + "px";
  
- // Add animation
- fishButton.style.animation="pulse 0.5s infinite alternate";
+ // Add enhanced animation
+ fishButton.style.animation = "enhancedPulse 0.6s infinite alternate";
  
- // Add CSS for animation
- if(!document.querySelector('#button-styles')){
+ // Add enhanced CSS for animation
+ if(!document.querySelector('#enhanced-button-styles')) {
    const style = document.createElement('style');
-   style.id = 'button-styles';
+   style.id = 'enhanced-button-styles';
    style.textContent = `
-     @keyframes pulse {
-       from { transform: scale(1); box-shadow: 0 0 20px rgba(255, 215, 0, 0.7); }
-       to { transform: scale(1.05); box-shadow: 0 0 30px rgba(255, 215, 0, 0.9); }
+     @keyframes enhancedPulse {
+       from { 
+         transform: scale(1) rotate(-1deg); 
+         box-shadow: 0 0 30px rgba(255, 107, 107, 0.8);
+       }
+       to { 
+         transform: scale(1.08) rotate(1deg); 
+         box-shadow: 0 0 50px rgba(255, 107, 107, 1);
+       }
      }
    `;
    document.head.appendChild(style);
@@ -1092,49 +1558,57 @@ function createFishButton(){
  document.body.appendChild(fishButton);
 }
 
-function startFishing(){
+function startFishing() {
  const currentRod = inventory[selected];
- if(!["Rod","Sun Rod","Moon Rod","Ocean Rod"].includes(currentRod)) return;
+ if(!["Rod", "Sun Rod", "Moon Rod", "Ocean Rod"].includes(currentRod)) return;
  
- fishing=true;
- holding=false;
- holdTime=0;
- taps=0;
- msg.style.display="block";
- msg.textContent="Casting...";
- const castDelay = 1000 + Math.random()*1500;
+ fishing = true;
+ holding = false;
+ holdTime = 0;
+ taps = 0;
+ msg.style.display = "block";
+ msg.textContent = "🎣 Casting line...";
+ const castDelay = 1000 + Math.random() * 1500;
 
- setTimeout(()=>{
-   const fish=randomFish(currentRod);
+ setTimeout(() => {
+   const fish = randomFish(currentRod);
    const multiplier = rodMultipliers[currentRod];
-   msg.textContent=fish+"! Catch it by pressing the button! (Rod: " + multiplier + "x)";
+   msg.textContent = `${fish}! Catch it by pressing the button! (Rod: ${multiplier}x)`;
    
-   function failFish(){
-     msg.textContent="Fish escaped!";
-     fishing=false;
+   function failFish() {
+     msg.textContent = "😢 Fish escaped!";
+     fishing = false;
      if(fishButton) document.body.removeChild(fishButton);
-     fishButton=null;
+     fishButton = null;
      clearTimeout(fishTimer);
-     setTimeout(()=>{msg.style.display="none"},2000);
+     setTimeout(() => { msg.style.display = "none"; }, 2000);
    }
 
-   function nextTap(){
-     if(taps>=requiredTaps){
-       const isRare = ["Kraken","Terrorshark","GreatWhiteShark","Megalodon","MantaRay","SeaTurtle"].includes(fish);
-       const isUltraRare = ["Kraken","Terrorshark","GreatWhiteShark"].includes(fish);
+   function nextTap() {
+     if(taps >= requiredTaps) {
+       const isRare = ["Kraken", "Terrorshark", "GreatWhiteShark", "Megalodon", "MantaRay", "SeaTurtle"].includes(fish);
+       const isUltraRare = ["Kraken", "Terrorshark", "GreatWhiteShark"].includes(fish);
+       
        msg.style.color = isUltraRare ? "#ff00ff" : (isRare ? "gold" : "white");
-       msg.style.fontSize = isUltraRare ? "30px" : (isRare ? "28px" : "22px");
-       msg.textContent=(isUltraRare ? "🔥 ULTRA RARE! " : (isRare ? "🎉 RARE! " : ""))+"Caught "+fish+"!";
+       msg.style.fontSize = isUltraRare ? "32px" : (isRare ? "28px" : "24px");
+       msg.textContent = (isUltraRare ? "🔥 ULTRA RARE! " : (isRare ? "🎉 RARE! " : "")) + "Caught " + fish + "! 🎣";
+       
+       // Show fish model briefly
+       showFishPreview(fish, 1);
+       setTimeout(() => {
+         fishPreview.style.display = "none";
+       }, 1500);
+       
        addItem(fish);
-       fishing=false;
+       fishing = false;
        if(fishButton) document.body.removeChild(fishButton);
-       fishButton=null;
+       fishButton = null;
        clearTimeout(fishTimer);
-       setTimeout(()=>{
-         msg.style.display="none";
+       setTimeout(() => {
+         msg.style.display = "none";
          msg.style.color = "white";
          msg.style.fontSize = "22px";
-       },isUltraRare ? 4000 : 3000);
+       }, isUltraRare ? 4000 : 3000);
        savePlayerData();
        return;
      }
@@ -1142,13 +1616,13 @@ function startFishing(){
      
      // Apply Faster Fishing upgrade
      const timeLimit = playerUpgrades.fasterFishing ? 1500 : 1000;
-     fishTimer=setTimeout(failFish, timeLimit);
+     fishTimer = setTimeout(failFish, timeLimit);
      
-     fishButton.onclick=()=>{
+     fishButton.onclick = () => {
        taps++;
        clearTimeout(fishTimer);
        if(fishButton) document.body.removeChild(fishButton);
-       fishButton=null;
+       fishButton = null;
        nextTap();
      }
    }
@@ -1158,31 +1632,31 @@ function startFishing(){
 }
 
 /* BOOK */
-book.onclick=()=>rules.style.display="block";
+book.onclick = () => rules.style.display = "block";
 
 /* ===== LOGIN FEATURE ===== */
-const loginDiv=document.getElementById("login");
-const usernameInput=document.getElementById("username");
-const loginBtn=document.getElementById("loginBtn");
-let username=null;
+const loginDiv = document.getElementById("login");
+const usernameInput = document.getElementById("username");
+const loginBtn = document.getElementById("loginBtn");
+let username = null;
 
-function loadPlayerData(name){
- const data=localStorage.getItem("fishingGame_"+name);
- if(data){
-  const parsed=JSON.parse(data);
-  money=parsed.money||0;
-  inventory.splice(0,inventory.length,...parsed.inventory||inventory);
-  selected=parsed.selected||0;
+function loadPlayerData(name) {
+ const data = localStorage.getItem("fishingGame_" + name);
+ if(data) {
+  const parsed = JSON.parse(data);
+  money = parsed.money || 0;
+  inventory.splice(0, inventory.length, ...(parsed.inventory || inventory));
+  selected = parsed.selected || 0;
   if(parsed.upgrades) playerUpgrades = parsed.upgrades;
  }
- document.getElementById("money").textContent="$"+money;
+ document.getElementById("money").textContent = "$" + money;
  renderInv();
  updateUpgradeButtons();
 }
 
-function savePlayerData(){
- if(!username)return;
- localStorage.setItem("fishingGame_"+username,JSON.stringify({
+function savePlayerData() {
+ if(!username) return;
+ localStorage.setItem("fishingGame_" + username, JSON.stringify({
    money,
    inventory,
    selected,
@@ -1190,83 +1664,109 @@ function savePlayerData(){
  }));
 }
 
-loginBtn.onclick=()=>{
- const name=usernameInput.value.trim();
- if(!name)return alert("Enter a username");
- username=name;
+loginBtn.onclick = () => {
+ const name = usernameInput.value.trim();
+ if(!name) return alert("Enter a username");
+ username = name;
  loadPlayerData(username);
- loginDiv.style.display="none";
+ loginDiv.style.display = "none";
  savePlayerData();
 };
 
-setInterval(savePlayerData,5000);
+setInterval(savePlayerData, 5000);
 
-/* ===== NPC ANIMATIONS ===== */
+/* ===== ENHANCED NPC ANIMATIONS ===== */
 let fishermanTime = 0;
 let upgradesNPCTime = 0;
 
-function animateFisherman(){
+function animateFisherman() {
   fishermanTime += 0.01;
-  fisherman.position.y = 1 + Math.sin(fishermanTime * 0.5) * 0.02;
-  fisherman.rotation.y = Math.sin(fishermanTime * 0.2) * 0.1;
+  fisherman.position.y = 2 + Math.sin(fishermanTime * 0.5) * 0.03;
+  fisherman.rotation.y = Math.sin(fishermanTime * 0.15) * 0.2;
   
-  if(npcRod){
-    npcRod.rotation.z = Math.PI/6 + Math.sin(fishermanTime * 1.5) * 0.1;
-  }
-  
-  if(fishingLine){
-    fishingLine.rotation.z = Math.PI/3 + Math.sin(fishermanTime * 1.5) * 0.05;
-    fishingLine.scale.y = 1 + Math.sin(fishermanTime * 2) * 0.1;
+  if(npcRod) {
+    npcRod.rotation.z = Math.PI/6 + Math.sin(fishermanTime * 1.3) * 0.15;
   }
 }
 
-function animateUpgradesNPC(){
+function animateUpgradesNPC() {
   upgradesNPCTime += 0.01;
-  upgradesNPC.position.y = 1 + Math.sin(upgradesNPCTime * 0.5) * 0.02;
-  upgradesNPC.rotation.y = Math.sin(upgradesNPCTime * 0.3) * 0.2;
+  upgradesNPC.position.y = 2 + Math.sin(upgradesNPCTime * 0.5) * 0.03;
+  upgradesNPC.rotation.y = Math.sin(upgradesNPCTime * 0.25) * 0.3;
   
-  // Animate staff
-  if(staff){
-    staff.rotation.z = -Math.PI/8 + Math.sin(upgradesNPCTime * 1.2) * 0.05;
+  if(staff) {
+    staff.rotation.z = -Math.PI/8 + Math.sin(upgradesNPCTime * 1.1) * 0.08;
   }
   
-  // Animate crystal
-  if(crystal){
-    crystal.scale.setScalar(1 + Math.sin(upgradesNPCTime * 3) * 0.1);
-    crystal.material.emissiveIntensity = 0.3 + Math.sin(upgradesNPCTime * 4) * 0.2;
+  if(crystal) {
+    crystal.rotation.y += 0.02;
+    crystal.scale.setScalar(1 + Math.sin(upgradesNPCTime * 3.5) * 0.15);
+    crystal.material.emissiveIntensity = 0.5 + Math.sin(upgradesNPCTime * 4) * 0.3;
   }
 }
 
-/* ===== LOOP ===== */
-function animate(){
+/* ===== ENHANCED MAIN LOOP ===== */
+let oceanTime = 0;
+function animate() {
  requestAnimationFrame(animate);
+ 
+ // Update ocean waves
+ oceanTime += 0.02;
+ const oceanPosition = ocean.geometry.attributes.position;
+ for(let i = 0; i < oceanPosition.count; i++) {
+   const x = oceanPosition.getX(i);
+   const y = oceanPosition.getY(i);
+   const wave = Math.sin(x * 0.05 + oceanTime) * Math.cos(y * 0.05 + oceanTime) * 0.3;
+   oceanPosition.setZ(i, wave);
+ }
+ oceanPosition.needsUpdate = true;
+ 
  updateRod();
 
- camera.rotation.order="YXZ";
- camera.rotation.y=yaw;
- camera.rotation.x=pitch;
+ camera.rotation.order = "YXZ";
+ camera.rotation.y = yaw;
+ camera.rotation.x = pitch;
 
- const f=new THREE.Vector3(Math.sin(yaw),0,Math.cos(yaw));
- const r=new THREE.Vector3(f.z,0,-f.x);
- player.position.add(f.multiplyScalar(moveZ*.15));
- player.position.add(r.multiplyScalar(moveX*.15));
+ const f = new THREE.Vector3(Math.sin(yaw), 0, Math.cos(yaw));
+ const r = new THREE.Vector3(f.z, 0, -f.x);
+ player.position.add(f.multiplyScalar(moveZ * 0.18));
+ player.position.add(r.multiplyScalar(moveX * 0.18));
 
- velocityY-=.01;
- player.position.y+=velocityY;
- if(player.position.y<=3){player.position.y=3;velocityY=0;grounded=true;}
+ velocityY -= 0.015;
+ player.position.y += velocityY;
+ if(player.position.y <= 4) {
+   player.position.y = 4;
+   velocityY = 0;
+   grounded = true;
+ }
 
- if(holding&&!fishing){
-  holdTime+=.016;
-  if(holdTime>=2){startFishing();holding=false;}
+ if(holding && !fishing) {
+  holdTime += 0.016;
+  if(holdTime >= 2) {
+    startFishing();
+    holding = false;
+  }
  }
 
  // Animate NPCs
  animateFisherman();
  animateUpgradesNPC();
 
- renderer.render(scene,camera);
+ // Animate vegetation
+ vegetation.rotation.y += 0.0005;
+
+ renderer.render(scene, camera);
 }
 animate();
+
+// Handle window resize
+window.addEventListener('resize', () => {
+ camera.aspect = window.innerWidth / window.innerHeight;
+ camera.updateProjectionMatrix();
+ renderer.setSize(window.innerWidth, window.innerHeight);
+ waterCanvas.width = window.innerWidth;
+ waterCanvas.height = window.innerHeight;
+});
 </script>
 </body>
 </html>
