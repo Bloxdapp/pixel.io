@@ -152,7 +152,13 @@ html,body{margin:0;padding:0;overflow:hidden;background:black;touch-action:none}
 
  💰 <b>Selling</b><br>
  • Tap fish once to preview<br>
- • Tap twice to sell
+ • Tap twice to sell<br><br>
+
+ 🎣 <b>Rods</b><br>
+ • Basic Rod – Normal chances<br>
+ • Sun Rod – 50% better rare fish<br>
+ • Moon Rod – 75% Megalodon chance<br>
+ • Ocean Rod – 100% Megalodon chance
  </p>
  <button onclick="rules.style.display='none'">CLOSE</button>
 </div>
@@ -168,6 +174,9 @@ html,body{margin:0;padding:0;overflow:hidden;background:black;touch-action:none}
 <div id="shop">
  <h3>Shop</h3>
  <button id="buySunRod">Buy Sun Rod ($1000)</button><br>
+ <button id="buyMoonRod">Buy Moon Rod ($10,000)</button><br>
+ <button id="buyOceanRod">Buy Ocean Rod ($100,000)</button><br>
+ <button id="expandInv">Buy 3 Inventory Slots ($500)</button><br>
  <br>
  <button onclick="shop.style.display='none'">CLOSE</button>
 </div>
@@ -287,7 +296,7 @@ function placeVegetation(countTrees, countBushes){
 }
 
 /* ---------- DENSITY ---------- */
-placeVegetation(28, 35); // ← MORE trees & bushes
+placeVegetation(28, 35);
 scene.add(vegetation);
 
 
@@ -308,7 +317,7 @@ let yaw=0,pitch=0;
 /* CAMERA LOOK */
 let looking=false,lastX=0,lastY=0;
 addEventListener("touchstart",e=>{
- if(e.target.closest(".slot")||e.target.id==="joystick"||e.target.id==="stick"||e.target.id==="jump"||e.target.id==="book")return;
+ if(e.target.closest(".slot")||e.target.id==="joystick"||e.target.id==="stick"||e.target.id==="jump"||e.target.id==="book"||e.target.closest("#shop")||e.target.closest("#rules")||e.target.closest("#login"))return;
  looking=true;
  lastX=e.touches[0].clientX;
  lastY=e.touches[0].clientY;
@@ -402,7 +411,7 @@ function slotTap(index){
   renderInv();
   updateRod();
 
-  if(!name || name==="Rod" || name==="Sun Rod") return;
+  if(!name || name==="Rod" || name==="Sun Rod" || name==="Moon Rod" || name==="Ocean Rod") return;
 
   const now = Date.now();
   if(lastTapTime && now-lastTapTime<500 && selected===index){
@@ -412,6 +421,7 @@ function slotTap(index){
     inventory[index] = "";
     renderInv();
     lastTapTime = 0;
+    savePlayerData();
   }else{
     // Single tap → preview
     msg.style.display = "block";
@@ -438,32 +448,36 @@ renderInv();
 function expandInventory(slots=3){
   for(let i=0;i<slots;i++) inventory.push("");
   renderInv();
+  savePlayerData();
 }
-
-// Example shop button for expansion (can be added to your shop)
-const expandBtn = document.createElement("button");
-expandBtn.textContent = "Buy 3 Inventory Slots ($500)";
-expandBtn.onclick = ()=>{
-  if(money<500) return alert("Not enough money");
-  money -= 500;
-  document.getElementById("money").textContent = "$"+money;
-  expandInventory(3);
-};
-shop.appendChild(expandBtn);
 
 /* ROD */
 let rod=null;
 function updateRod(){
- if(inventory[selected]==="Rod"||inventory[selected]==="Sun Rod"){
-   if(!rod){
-     rod=new THREE.Mesh(new THREE.CylinderGeometry(.02,.02,1),new THREE.MeshStandardMaterial({color:inventory[selected]==="Sun Rod"?0xffcc00:0x8b4513}));
-     rod.position.set(.3,-.4,-1);
-     rod.rotation.z=Math.PI/4;
-     camera.add(rod);
-   }else{
-     rod.material.color.set(inventory[selected]==="Sun Rod"?0xffcc00:0x8b4513);
-   }
- }else if(rod){camera.remove(rod);rod=null;}
+  const currentRod = inventory[selected];
+  const rodTypes = ["Rod", "Sun Rod", "Moon Rod", "Ocean Rod"];
+  
+  if(rodTypes.includes(currentRod)){
+    if(!rod){
+      rod=new THREE.Mesh(new THREE.CylinderGeometry(.02,.02,1),new THREE.MeshStandardMaterial({color:0x8b4513}));
+      rod.position.set(.3,-.4,-1);
+      rod.rotation.z=Math.PI/4;
+      camera.add(rod);
+    }
+    
+    // Set color based on rod type
+    let color;
+    switch(currentRod){
+      case "Sun Rod": color = 0xffcc00; break;
+      case "Moon Rod": color = 0x8a2be2; break;
+      case "Ocean Rod": color = 0x00bfff; break;
+      default: color = 0x8b4513;
+    }
+    rod.material.color.set(color);
+  }else if(rod){
+    camera.remove(rod);
+    rod=null;
+  }
 }
 
 /* ORB CLICK → SHOP */
@@ -479,28 +493,126 @@ addEventListener("touchstart",e=>{
 });
 
 /* SHOP BUTTONS */
-buySunRod.onclick=()=>{
+document.getElementById('buySunRod').onclick = ()=>{
  if(money<1000)return alert("Not enough money");
  for(let i=0;i<inventory.length;i++){
-  if(inventory[i]==="Rod"){inventory[i]="Sun Rod"; renderInv(); money-=1000; document.getElementById("money").textContent="$"+money; return;}
+  if(inventory[i]==="Rod"||inventory[i]==="Moon Rod"||inventory[i]==="Ocean Rod"){
+    inventory[i]="Sun Rod"; 
+    renderInv(); 
+    money-=1000; 
+    document.getElementById("money").textContent="$"+money; 
+    savePlayerData();
+    return;
+  }
  }
  for(let i=0;i<inventory.length;i++){
-  if(inventory[i]===""){inventory[i]="Sun Rod"; money-=1000; document.getElementById("money").textContent="$"+money; renderInv(); return;}
+  if(inventory[i]===""){
+    inventory[i]="Sun Rod"; 
+    money-=1000; 
+    document.getElementById("money").textContent="$"+money; 
+    renderInv(); 
+    savePlayerData();
+    return;
+  }
  }
  alert("Inventory full!");
 };
 
+document.getElementById('buyMoonRod').onclick = ()=>{
+ if(money<10000)return alert("Not enough money");
+ for(let i=0;i<inventory.length;i++){
+  if(inventory[i]==="Rod"||inventory[i]==="Sun Rod"||inventory[i]==="Ocean Rod"){
+    inventory[i]="Moon Rod"; 
+    renderInv(); 
+    money-=10000; 
+    document.getElementById("money").textContent="$"+money; 
+    savePlayerData();
+    return;
+  }
+ }
+ for(let i=0;i<inventory.length;i++){
+  if(inventory[i]===""){
+    inventory[i]="Moon Rod"; 
+    money-=10000; 
+    document.getElementById("money").textContent="$"+money; 
+    renderInv(); 
+    savePlayerData();
+    return;
+  }
+ }
+ alert("Inventory full!");
+};
 
+document.getElementById('buyOceanRod').onclick = ()=>{
+ if(money<100000)return alert("Not enough money");
+ for(let i=0;i<inventory.length;i++){
+  if(inventory[i]==="Rod"||inventory[i]==="Sun Rod"||inventory[i]==="Moon Rod"){
+    inventory[i]="Ocean Rod"; 
+    renderInv(); 
+    money-=100000; 
+    document.getElementById("money").textContent="$"+money; 
+    savePlayerData();
+    return;
+  }
+ }
+ for(let i=0;i<inventory.length;i++){
+  if(inventory[i]===""){
+    inventory[i]="Ocean Rod"; 
+    money-=100000; 
+    document.getElementById("money").textContent="$"+money; 
+    renderInv(); 
+    savePlayerData();
+    return;
+  }
+ }
+ alert("Inventory full!");
+};
+
+document.getElementById('expandInv').onclick = ()=>{
+  if(money<500) return alert("Not enough money");
+  money -= 500;
+  document.getElementById("money").textContent = "$"+money;
+  expandInventory(3);
+  savePlayerData();
+};
 
 /* ===== REACTION-TIME MINI-GAME FISHING ===== */
 let holding=false, holdTime=0, fishing=false, taps=0, requiredTaps=10, fishButton=null, fishTimer=null;
 
-addEventListener("touchstart",()=>{if(inventory[selected]==="Rod"||inventory[selected]==="Sun Rod"){if(!fishing){holding=true; holdTime=0}}});
+addEventListener("touchstart",(e)=>{
+  const currentRod = inventory[selected];
+  if(["Rod","Sun Rod","Moon Rod","Ocean Rod"].includes(currentRod)){
+    if(!fishing && !joy && !e.target.closest("#shop") && !e.target.closest("#rules")){
+      holding=true; 
+      holdTime=0;
+    }
+  }
+});
 addEventListener("touchend",()=>{holding=false; holdTime=0});
 
-function randomFish(){
+function randomFish(currentRod){
  const r=Math.random();
  let fish="";
+ 
+ // Check for Ocean Rod (100% Megalodon)
+ if(currentRod === "Ocean Rod") return "Megalodon";
+ 
+ // Check for Moon Rod (75% Megalodon, 25% other rares)
+ if(currentRod === "Moon Rod"){
+   if(r < 0.75) return "Megalodon";
+   if(r < 0.80) return "MantaRay";
+   if(r < 0.85) return "SeaTurtle";
+   if(r < 0.90) return "Pufferfish";
+   return "Shark";
+ }
+ 
+ // Sun Rod logic (50% better rare chances)
+ if(currentRod === "Sun Rod" && Math.random()<0.5){
+   const rarities=["Megalodon","MantaRay","SeaTurtle"];
+   return rarities[Math.floor(Math.random()*rarities.length)];
+ }
+ 
+ // Basic rod logic
  if(r<1/50) fish="Megalodon";
  else if(r<1/25) fish="MantaRay";
  else if(r<1/5) fish="SeaTurtle";
@@ -508,11 +620,7 @@ function randomFish(){
  else if(r<0.58) fish="Tuna";
  else if(r<0.83) fish="Clownfish";
  else fish="Shark";
-
- if(inventory[selected]==="Sun Rod" && Math.random()<0.5){
-  const rarities=["Megalodon","MantaRay","SeaTurtle"];
-  fish=rarities[Math.floor(Math.random()*rarities.length)];
- }
+ 
  return fish;
 }
 
@@ -521,20 +629,24 @@ function createFishButton(){
  fishButton=document.createElement("button");
  fishButton.textContent="PRESS HERE!";
  fishButton.style.position="fixed";
- fishButton.style.zIndex="100";
+ fishButton.style.zIndex="200";
  fishButton.style.padding="12px 20px";
  fishButton.style.fontSize="18px";
  fishButton.style.borderRadius="8px";
  fishButton.style.background="yellow";
  fishButton.style.color="black";
- const x=Math.random()*(window.innerWidth-150);
- const y=Math.random()*(window.innerHeight-60);
+ fishButton.style.border="3px solid red";
+ const x=Math.random()*(window.innerWidth-150)+50;
+ const y=Math.random()*(window.innerHeight-60)+50;
  fishButton.style.left=x+"px";
  fishButton.style.top=y+"px";
  document.body.appendChild(fishButton);
 }
 
 function startFishing(){
+ const currentRod = inventory[selected];
+ if(!["Rod","Sun Rod","Moon Rod","Ocean Rod"].includes(currentRod)) return;
+ 
  fishing=true;
  holding=false;
  holdTime=0;
@@ -544,7 +656,7 @@ function startFishing(){
  const castDelay = 1000 + Math.random()*1500;
 
  setTimeout(()=>{
-   const fish=randomFish();
+   const fish=randomFish(currentRod);
    msg.textContent=fish+"! Catch it by pressing the button!";
    
    function failFish(){
@@ -558,13 +670,21 @@ function startFishing(){
 
    function nextTap(){
      if(taps>=requiredTaps){
-       msg.textContent="Caught "+fish+"!";
+       const isRare = ["Megalodon","MantaRay","SeaTurtle"].includes(fish);
+       msg.style.color = isRare ? "gold" : "white";
+       msg.style.fontSize = isRare ? "28px" : "22px";
+       msg.textContent=(isRare ? "🎉 RARE CATCH! " : "")+"Caught "+fish+"!";
        addItem(fish);
        fishing=false;
        if(fishButton) document.body.removeChild(fishButton);
        fishButton=null;
        clearTimeout(fishTimer);
-       setTimeout(()=>{msg.style.display="none"},2000);
+       setTimeout(()=>{
+         msg.style.display="none";
+         msg.style.color = "white";
+         msg.style.fontSize = "22px";
+       },3000);
+       savePlayerData();
        return;
      }
      createFishButton();
