@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -58,7 +57,7 @@ html,body{margin:0;padding:0;overflow:hidden;background:black;touch-action:none}
  margin-bottom:10px;
 }
 
-/* NEW: ROD EQUIPMENT BUTTON */
+/* ROD EQUIPMENT BUTTON */
 #rodButton{
  position:fixed;top:130px;left:10px;
  font-size:32px;cursor:pointer;
@@ -73,7 +72,7 @@ html,body{margin:0;padding:0;overflow:hidden;background:black;touch-action:none}
 }
 #rodButton:hover{transform:scale(1.1);}
 
-/* NEW: ROD EQUIPMENT MENU */
+/* ROD EQUIPMENT MENU */
 #rodEquipmentMenu{
  position:fixed;top:50%;left:50%;
  transform:translate(-50%,-50%);
@@ -526,7 +525,7 @@ html,body{margin:0;padding:0;overflow:hidden;background:black;touch-action:none}
  <h3 style="color:#00a8ff">🎣 FISHING MECHANICS</h3>
  <p>
  <b>Step 1 - Equip Rod:</b><br>
- • Select a fishing rod from your equipment menu (🎣 button)<br>
+ • Click the 🎣 button to open equipment menu<br>
  • You start with a Basic Rod<br>
  • Better rods = better fish chances<br><br>
 
@@ -1641,7 +1640,7 @@ function updateRodList() {
     rodList.appendChild(createRodButton(rodName, isOwned, isEquipped));
   });
   
-  // Add separator
+  // Add separator if on snowy island
   if(currentIsland === 'snowy') {
     const separator = document.createElement('div');
     separator.innerHTML = '<h4 style="color:#a0d2ff; margin:20px 0 10px 0; text-align:left;">❄️ Snowy Island Rods</h4>';
@@ -1945,11 +1944,6 @@ let selected = 0;
 const inv = document.getElementById("inventory");
 let lastTapTime = 0;
 
-// Check if player has Ocean Rod
-function checkOceanRod() {
-  return ownedRods.includes("Ocean Rod");
-}
-
 // Parse item stacks
 function parseStack(item) {
   if(!item) return {name: "", count: 0};
@@ -1988,7 +1982,7 @@ function slotTap(index) {
   selected = index;
   renderInv();
 
-  if(!name || rodData[name]) return;
+  if(!name) return;
 
   const now = Date.now();
   if(lastTapTime && now - lastTapTime < 500 && selected === index) {
