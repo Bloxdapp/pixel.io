@@ -484,12 +484,12 @@ const oceanFragmentShader = `
   }
 `;
 
-/* ENHANCED ISLAND */
+/* ENHANCED ISLAND - SIMPLE GREEN GROUND */
 const islandGeometry = new THREE.CylinderGeometry(20, 25, 3, 64);
 const islandMaterial = new THREE.MeshStandardMaterial({
-  color: 0x228b22,
-  roughness: 0.7,
-  metalness: 0.1
+  color: 0x2E8B57, // Dark green color
+  roughness: 0.9, // High roughness for non-shiny surface
+  metalness: 0.0 // No metalness for natural look
 });
 const island = new THREE.Mesh(islandGeometry, islandMaterial);
 island.position.set(0, 1.5, 0);
@@ -497,12 +497,12 @@ island.castShadow = true;
 island.receiveShadow = true;
 scene.add(island);
 
-// Add island detail
+// Add simple grass layer
 const islandDetailGeometry = new THREE.CylinderGeometry(19, 24, 0.5, 64);
 const islandDetailMaterial = new THREE.MeshStandardMaterial({
-  color: 0x32cd32,
-  roughness: 0.8,
-  metalness: 0
+  color: 0x3CB371, // Medium green for grass
+  roughness: 0.95, // Very rough, non-shiny
+  metalness: 0.0
 });
 const islandDetail = new THREE.Mesh(islandDetailGeometry, islandDetailMaterial);
 islandDetail.position.set(0, 2.75, 0);
