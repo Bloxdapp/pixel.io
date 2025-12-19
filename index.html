@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -271,6 +272,34 @@ html,body{margin:0;padding:0;overflow:hidden;background:black;touch-action:none}
  pointer-events:none;
  z-index:1;
 }
+
+/* FISH BUTTON */
+#fishButton {
+ position: fixed;
+ z-index: 200;
+ border-radius: 15px;
+ background: linear-gradient(45deg, #ff6b6b, #ffd93d, #6bcf7f);
+ color: black;
+ border: 4px solid #ff4757;
+ font-weight: bold;
+ box-shadow: 0 0 30px rgba(255, 107, 107, 0.8);
+ text-shadow: 1px 1px 2px white;
+ font-size: 22px;
+ padding: 15px 30px;
+ cursor: pointer;
+ animation: enhancedPulse 0.6s infinite alternate;
+ display: none;
+}
+@keyframes enhancedPulse {
+ from { 
+   transform: scale(1) rotate(-1deg); 
+   box-shadow: 0 0 30px rgba(255, 107, 107, 0.8);
+ }
+ to { 
+   transform: scale(1.08) rotate(1deg); 
+   box-shadow: 0 0 50px rgba(255, 107, 107, 1);
+ }
+}
 </style>
 </head>
 <body>
@@ -286,7 +315,6 @@ html,body{margin:0;padding:0;overflow:hidden;background:black;touch-action:none}
 </div>
 
 <div id="book">📘</div>
-
 <div id="rules">
  <h2>Fishing Game Rules</h2>
  <div style="text-align:left;line-height:1.6;">
@@ -335,6 +363,7 @@ html,body{margin:0;padding:0;overflow:hidden;background:black;touch-action:none}
 
 <div id="money">$0</div>
 <div id="msg"></div>
+<button id="fishButton">🎯 PRESS HERE! 🎯</button>
 
 <div id="joystick"><div id="stick"></div></div>
 <button id="jump">JUMP</button>
@@ -389,7 +418,6 @@ html,body{margin:0;padding:0;overflow:hidden;background:black;touch-action:none}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/controls/OrbitControls.js"></script>
 <script>
 /* ===== ENHANCED SCENE ===== */
 const scene = new THREE.Scene();
@@ -406,26 +434,20 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
 
-/* SIMPLE LIGHTING */
+/* LIGHTING */
 scene.add(new THREE.AmbientLight(0xffffff, 0.7));
-
-const sun = new THREE.DirectionalLight(0xffffff, 0.8);
+const sun = new THREE.DirectionalLight(0xffffff, 1.0);
 sun.position.set(50, 100, 50);
 sun.castShadow = true;
 sun.shadow.mapSize.width = 2048;
 sun.shadow.mapSize.height = 2048;
-sun.shadow.camera.left = -100;
-sun.shadow.camera.right = 100;
-sun.shadow.camera.top = 100;
-sun.shadow.camera.bottom = -100;
-sun.shadow.camera.near = 0.5;
-sun.shadow.camera.far = 500;
 scene.add(sun);
 
-/* SIMPLE OCEAN - NO MOVEMENT */
-const oceanGeometry = new THREE.PlaneGeometry(5000, 5000);
+/* SIMPLE GREEN OCEAN */
+const oceanGeometry = new THREE.PlaneGeometry(5000, 5000, 128, 128);
 const oceanMaterial = new THREE.MeshLambertMaterial({
-  color: 0x1e90ff
+  color: 0x1e90ff,
+  side: THREE.DoubleSide
 });
 const ocean = new THREE.Mesh(oceanGeometry, oceanMaterial);
 ocean.rotation.x = -Math.PI / 2;
@@ -433,7 +455,7 @@ ocean.position.y = -1;
 ocean.receiveShadow = true;
 scene.add(ocean);
 
-/* SIMPLE ISLAND - NO GLOW */
+/* SIMPLE GREEN ISLAND - NO GRASS TOP */
 const islandGeometry = new THREE.CylinderGeometry(20, 25, 3, 32);
 const islandMaterial = new THREE.MeshLambertMaterial({
   color: 0x228b22
@@ -444,22 +466,10 @@ island.castShadow = true;
 island.receiveShadow = true;
 scene.add(island);
 
-// Simple island detail
-const islandDetailGeometry = new THREE.CylinderGeometry(19, 24, 0.5, 32);
-const islandDetailMaterial = new THREE.MeshLambertMaterial({
-  color: 0x32cd32
-});
-const islandDetail = new THREE.Mesh(islandDetailGeometry, islandDetailMaterial);
-islandDetail.position.set(0, 2.75, 0);
-islandDetail.castShadow = true;
-islandDetail.receiveShadow = true;
-scene.add(islandDetail);
-
-/* ===== FISHERMAN NPC ===== */
+/* FISHERMAN NPC */
 const fisherman = new THREE.Group();
 fisherman.position.set(-8, 2, 8);
 
-// Fisherman body
 const body = new THREE.Mesh(
   new THREE.CylinderGeometry(0.6, 0.6, 1.8, 12),
   new THREE.MeshLambertMaterial({ color: 0x8b4513 })
@@ -468,7 +478,6 @@ body.position.y = 0.9;
 body.castShadow = true;
 fisherman.add(body);
 
-// Fisherman head
 const head = new THREE.Mesh(
   new THREE.SphereGeometry(0.5, 16, 16),
   new THREE.MeshLambertMaterial({ color: 0xf0c8a0 })
@@ -477,16 +486,13 @@ head.position.y = 2.2;
 head.castShadow = true;
 fisherman.add(head);
 
-// Fisherman hat
 const hat = new THREE.Mesh(
   new THREE.ConeGeometry(0.8, 0.4, 12),
   new THREE.MeshLambertMaterial({ color: 0x8b0000 })
 );
 hat.position.y = 2.6;
-hat.rotation.x = Math.PI / 8;
 fisherman.add(hat);
 
-// Fishing rod
 const npcRod = new THREE.Mesh(
   new THREE.CylinderGeometry(0.04, 0.04, 2.5, 8),
   new THREE.MeshLambertMaterial({ color: 0x8b4513 })
@@ -497,11 +503,10 @@ fisherman.add(npcRod);
 
 scene.add(fisherman);
 
-/* ===== UPGRADES NPC ===== */
+/* UPGRADES NPC */
 const upgradesNPC = new THREE.Group();
 upgradesNPC.position.set(8, 2, -8);
 
-// Upgrades NPC body
 const upgradesBody = new THREE.Mesh(
   new THREE.CylinderGeometry(0.6, 0.6, 1.8, 12),
   new THREE.MeshLambertMaterial({ color: 0x2e8b57 })
@@ -510,7 +515,6 @@ upgradesBody.position.y = 0.9;
 upgradesBody.castShadow = true;
 upgradesNPC.add(upgradesBody);
 
-// Upgrades NPC head
 const upgradesHead = new THREE.Mesh(
   new THREE.SphereGeometry(0.5, 16, 16),
   new THREE.MeshLambertMaterial({ color: 0xf0c8a0 })
@@ -519,7 +523,6 @@ upgradesHead.position.y = 2.2;
 upgradesHead.castShadow = true;
 upgradesNPC.add(upgradesHead);
 
-// Wizard hat
 const wizardHat = new THREE.Mesh(
   new THREE.ConeGeometry(0.9, 1.0, 12),
   new THREE.MeshLambertMaterial({ color: 0x4b0082 })
@@ -527,200 +530,103 @@ const wizardHat = new THREE.Mesh(
 wizardHat.position.y = 2.8;
 upgradesNPC.add(wizardHat);
 
-// Magical staff
-const staff = new THREE.Mesh(
-  new THREE.CylinderGeometry(0.05, 0.05, 3.0, 8),
-  new THREE.MeshLambertMaterial({ color: 0x800080 })
-);
-staff.position.set(0.8, 1.2, 0.4);
-staff.rotation.z = -Math.PI / 8;
-upgradesNPC.add(staff);
-
 scene.add(upgradesNPC);
 
-/* ===== 3D FISH MODELS ===== */
+/* FISH MODELS */
 const fishModels = {};
 
 // Clownfish
 const clownfishGeometry = new THREE.ConeGeometry(0.5, 1.5, 8);
 clownfishGeometry.rotateX(Math.PI / 2);
-const clownfishMaterial = new THREE.MeshLambertMaterial({ color: 0xFF6B35 });
-fishModels.Clownfish = new THREE.Mesh(clownfishGeometry, clownfishMaterial);
+fishModels.Clownfish = new THREE.Mesh(clownfishGeometry, new THREE.MeshLambertMaterial({color: 0xFF6B35}));
 
 // Tuna
 const tunaGeometry = new THREE.CapsuleGeometry(0.3, 1.2, 4, 8);
 tunaGeometry.rotateZ(Math.PI / 2);
-const tunaMaterial = new THREE.MeshLambertMaterial({ color: 0x4682B4 });
-fishModels.Tuna = new THREE.Mesh(tunaGeometry, tunaMaterial);
+fishModels.Tuna = new THREE.Mesh(tunaGeometry, new THREE.MeshLambertMaterial({color: 0x4682B4}));
 
 // Shark
 const sharkGeometry = new THREE.ConeGeometry(0.4, 2.0, 8);
 sharkGeometry.rotateX(Math.PI / 2);
-const sharkMaterial = new THREE.MeshLambertMaterial({ color: 0x708090 });
-fishModels.Shark = new THREE.Mesh(sharkGeometry, sharkMaterial);
+fishModels.Shark = new THREE.Mesh(sharkGeometry, new THREE.MeshLambertMaterial({color: 0x708090}));
 
 // Pufferfish
 const pufferfishGeometry = new THREE.SphereGeometry(0.6, 16, 16);
-const pufferfishMaterial = new THREE.MeshLambertMaterial({ color: 0x32CD32 });
-fishModels.Pufferfish = new THREE.Mesh(pufferfishGeometry, pufferfishMaterial);
+fishModels.Pufferfish = new THREE.Mesh(pufferfishGeometry, new THREE.MeshLambertMaterial({color: 0x32CD32}));
 
 // Sea Turtle
 const turtleGeometry = new THREE.BoxGeometry(1.2, 0.4, 1.5);
-const turtleMaterial = new THREE.MeshLambertMaterial({ color: 0x228B22 });
-fishModels.SeaTurtle = new THREE.Mesh(turtleGeometry, turtleMaterial);
+fishModels.SeaTurtle = new THREE.Mesh(turtleGeometry, new THREE.MeshLambertMaterial({color: 0x228B22}));
 
 // Manta Ray
 const mantaGeometry = new THREE.ConeGeometry(1.5, 0.3, 4);
 mantaGeometry.rotateX(Math.PI / 2);
-const mantaMaterial = new THREE.MeshLambertMaterial({ color: 0x483D8B });
-fishModels.MantaRay = new THREE.Mesh(mantaGeometry, mantaMaterial);
+fishModels.MantaRay = new THREE.Mesh(mantaGeometry, new THREE.MeshLambertMaterial({color: 0x483D8B}));
 
 // Great White Shark
 const greatWhiteGeometry = new THREE.ConeGeometry(0.6, 3.0, 12);
 greatWhiteGeometry.rotateX(Math.PI / 2);
-const greatWhiteMaterial = new THREE.MeshLambertMaterial({ color: 0xFFFFFF });
-fishModels.GreatWhiteShark = new THREE.Mesh(greatWhiteGeometry, greatWhiteMaterial);
+fishModels.GreatWhiteShark = new THREE.Mesh(greatWhiteGeometry, new THREE.MeshLambertMaterial({color: 0xFFFFFF}));
 
 // Terrorshark
 const terrorsharkGeometry = new THREE.ConeGeometry(0.8, 3.5, 12);
 terrorsharkGeometry.rotateX(Math.PI / 2);
-const terrorsharkMaterial = new THREE.MeshLambertMaterial({ color: 0xFF0000 });
-fishModels.Terrorshark = new THREE.Mesh(terrorsharkGeometry, terrorsharkMaterial);
+fishModels.Terrorshark = new THREE.Mesh(terrorsharkGeometry, new THREE.MeshLambertMaterial({color: 0xFF0000}));
 
 // Megalodon
 const megalodonGeometry = new THREE.ConeGeometry(1.2, 5.0, 16);
 megalodonGeometry.rotateX(Math.PI / 2);
-const megalodonMaterial = new THREE.MeshLambertMaterial({ color: 0x2F4F4F });
-fishModels.Megalodon = new THREE.Mesh(megalodonGeometry, megalodonMaterial);
+fishModels.Megalodon = new THREE.Mesh(megalodonGeometry, new THREE.MeshLambertMaterial({color: 0x2F4F4F}));
 
 // Kraken
 const krakenGeometry = new THREE.SphereGeometry(1.0, 32, 32);
 for(let i = 0; i < 8; i++) {
   const tentacle = new THREE.ConeGeometry(0.2, 3.0, 8);
   tentacle.rotateX(Math.PI / 2);
-  const tentacleMesh = new THREE.Mesh(tentacle, new THREE.MeshLambertMaterial({ color: 0x8B0000 }));
-  tentacleMesh.position.set(
-    Math.cos(i * Math.PI / 4) * 1.2,
-    0,
-    Math.sin(i * Math.PI / 4) * 1.2
-  );
+  const tentacleMesh = new THREE.Mesh(tentacle, new THREE.MeshLambertMaterial({color: 0x8B0000}));
+  tentacleMesh.position.set(Math.cos(i * Math.PI / 4) * 1.2, 0, Math.sin(i * Math.PI / 4) * 1.2);
   krakenGeometry.merge(tentacleMesh.geometry, tentacleMesh.matrix);
 }
-const krakenMaterial = new THREE.MeshLambertMaterial({ color: 0x8B0000 });
-fishModels.Kraken = new THREE.Mesh(krakenGeometry, krakenMaterial);
+fishModels.Kraken = new THREE.Mesh(krakenGeometry, new THREE.MeshLambertMaterial({color: 0x8B0000}));
 
-// Make all fish cast shadows
 Object.values(fishModels).forEach(fish => {
   fish.castShadow = true;
   fish.receiveShadow = true;
 });
 
-/* ===== SIMPLE VEGETATION ===== */
+/* SIMPLE TREES (NO BUSHES) */
 const vegetation = new THREE.Group();
 
-// Simple tree
-function createTree(x, z, scale = 1) {
+function createTree(x, z) {
   const tree = new THREE.Group();
-  
-  // Trunk
   const trunk = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.4*scale, 0.6*scale, 8*scale, 12),
+    new THREE.CylinderGeometry(0.4, 0.6, 8, 8),
     new THREE.MeshLambertMaterial({ color: 0x8b5a2b })
   );
-  trunk.position.y = 4*scale;
-  trunk.castShadow = true;
+  trunk.position.y = 4;
   tree.add(trunk);
   
-  // Leaves
-  for(let i = 0; i < 5; i++) {
-    const leaves = new THREE.Mesh(
-      new THREE.ConeGeometry(3.0*scale - i*0.5, 3.0*scale, 12),
-      new THREE.MeshLambertMaterial({ color: 0x228B22 })
-    );
-    leaves.position.y = 7*scale + i*1.5*scale;
-    leaves.castShadow = true;
-    tree.add(leaves);
-  }
+  const leaves = new THREE.Mesh(
+    new THREE.ConeGeometry(3.0, 3.0, 8),
+    new THREE.MeshLambertMaterial({ color: 0x228B22 })
+  );
+  leaves.position.y = 7;
+  tree.add(leaves);
   
   tree.position.set(x, 1.5, z);
-  tree.rotation.y = Math.random() * Math.PI * 2;
   return tree;
 }
 
-// Simple bush
-function createBush(x, z) {
-  const bush = new THREE.Group();
-  const bushCount = 3 + Math.floor(Math.random() * 4);
-  
-  for(let i = 0; i < bushCount; i++) {
-    const bushPart = new THREE.Mesh(
-      new THREE.SphereGeometry(0.8 + Math.random() * 0.4, 12, 12),
-      new THREE.MeshLambertMaterial({ color: 0x32CD32 })
-    );
-    bushPart.position.set(
-      (Math.random() - 0.5) * 2,
-      Math.random() * 0.5,
-      (Math.random() - 0.5) * 2
-    );
-    bushPart.castShadow = true;
-    bush.add(bushPart);
-  }
-  
-  bush.position.set(x, 1.5, z);
-  return bush;
-}
-
-// Place vegetation
-for(let i = 0; i < 15; i++) {
+for(let i = 0; i < 10; i++) {
   const angle = Math.random() * Math.PI * 2;
   const radius = 10 + Math.random() * 15;
-  const tree = createTree(
-    Math.cos(angle) * radius,
-    Math.sin(angle) * radius,
-    0.8 + Math.random() * 0.4
-  );
-  
-  const distFromFisherman = Math.sqrt(
-    Math.pow(tree.position.x - fisherman.position.x, 2) +
-    Math.pow(tree.position.z - fisherman.position.z, 2)
-  );
-  
-  const distFromUpgradesNPC = Math.sqrt(
-    Math.pow(tree.position.x - upgradesNPC.position.x, 2) +
-    Math.pow(tree.position.z - upgradesNPC.position.z, 2)
-  );
-  
-  if(distFromFisherman > 5 && distFromUpgradesNPC > 5) {
-    vegetation.add(tree);
-  }
-}
-
-for(let i = 0; i < 25; i++) {
-  const angle = Math.random() * Math.PI * 2;
-  const radius = 5 + Math.random() * 20;
-  const bush = createBush(
-    Math.cos(angle) * radius,
-    Math.sin(angle) * radius
-  );
-  
-  const distFromFisherman = Math.sqrt(
-    Math.pow(bush.position.x - fisherman.position.x, 2) +
-    Math.pow(bush.position.z - fisherman.position.z, 2)
-  );
-  
-  const distFromUpgradesNPC = Math.sqrt(
-    Math.pow(bush.position.x - upgradesNPC.position.x, 2) +
-    Math.pow(bush.position.z - upgradesNPC.position.z, 2)
-  );
-  
-  if(distFromFisherman > 4 && distFromUpgradesNPC > 4) {
-    vegetation.add(bush);
-  }
+  const tree = createTree(Math.cos(angle) * radius, Math.sin(angle) * radius);
+  vegetation.add(tree);
 }
 
 scene.add(vegetation);
 
-/* ===== WATER EFFECTS ===== */
+/* WATER EFFECTS */
 const waterCanvas = document.getElementById('waterCanvas');
 const waterCtx = waterCanvas.getContext('2d');
 waterCanvas.width = window.innerWidth;
@@ -758,20 +664,13 @@ for(let i = 0; i < 100; i++) {
 
 function animateWater() {
   waterCtx.clearRect(0, 0, waterCanvas.width, waterCanvas.height);
-  
   waterDrops.forEach(drop => {
     drop.update();
     drop.draw();
   });
-  
   requestAnimationFrame(animateWater);
 }
 animateWater();
-
-window.addEventListener('resize', () => {
-  waterCanvas.width = window.innerWidth;
-  waterCanvas.height = window.innerHeight;
-});
 
 /* PLAYER */
 const player = new THREE.Object3D();
@@ -789,7 +688,8 @@ addEventListener("touchstart", e => {
     e.target.id === "stick" || e.target.id === "jump" || 
     e.target.id === "book" || e.target.closest("#shop") || 
     e.target.closest("#upgradesShop") || e.target.closest("#rules") || 
-    e.target.closest("#login") || e.target.closest("#fishPreview")) return;
+    e.target.closest("#login") || e.target.closest("#fishPreview") ||
+    e.target.id === "fishButton") return;
  looking = true;
  lastX = e.touches[0].clientX;
  lastY = e.touches[0].clientY;
@@ -806,13 +706,15 @@ addEventListener("touchend", () => looking = false);
 
 /* MOVE */
 let moveX = 0, moveZ = 0, joy = false, center = {};
-joystick.addEventListener("touchstart", () => {
+joystick.addEventListener("touchstart", (e) => {
+ e.preventDefault();
  joy = true;
  const r = joystick.getBoundingClientRect();
  center = {x: r.left + r.width/2, y: r.top + r.height/2};
 });
 addEventListener("touchmove", e => {
  if(!joy) return;
+ e.preventDefault();
  let dx = e.touches[0].clientX - center.x;
  let dy = e.touches[0].clientY - center.y;
  dx = Math.max(-45, Math.min(45, dx));
@@ -837,7 +739,7 @@ jump.addEventListener("touchstart", () => {
  }
 });
 
-/* ===== ENHANCED INVENTORY SYSTEM ===== */
+/* ENHANCED INVENTORY SYSTEM */
 let money = 0;
 const prices = {
   Clownfish: 5, 
@@ -858,7 +760,7 @@ let selected = 0;
 const inv = document.getElementById("inventory");
 let lastTapTime = 0;
 
-/* ===== ENHANCED UPGRADES SYSTEM ===== */
+/* ENHANCED UPGRADES SYSTEM */
 let playerUpgrades = {
   biggerButton: false,
   fasterFishing: false,
@@ -942,10 +844,6 @@ function showFishPreview(fishName, count) {
   previewLight1.position.set(5, 5, 5);
   previewScene.add(previewLight1);
   
-  const previewLight2 = new THREE.DirectionalLight(0xffffff, 0.5);
-  previewLight2.position.set(-5, 5, -5);
-  previewScene.add(previewLight2);
-  
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
   previewScene.add(ambientLight);
   
@@ -1024,20 +922,12 @@ function updateRod() {
       camera.add(rod);
     }
     
-    // Enhanced rod colors
     let color;
     switch(currentRod) {
-      case "Sun Rod": 
-        color = 0xffcc00; 
-        break;
-      case "Moon Rod": 
-        color = 0x8a2be2; 
-        break;
-      case "Ocean Rod": 
-        color = 0x00bfff; 
-        break;
-      default: 
-        color = 0x8b4513; 
+      case "Sun Rod": color = 0xffcc00; break;
+      case "Moon Rod": color = 0x8a2be2; break;
+      case "Ocean Rod": color = 0x00bfff; break;
+      default: color = 0x8b4513;
     }
     
     rod.material.color.set(color);
@@ -1252,12 +1142,12 @@ document.getElementById('buyFasterFishing').onclick = () => {
 };
 
 /* ===== ENHANCED FISHING SYSTEM ===== */
-let holding = false, holdTime = 0, fishing = false, taps = 0, requiredTaps = 10, fishButton = null, fishTimer = null;
+let holding = false, holdTime = 0, fishing = false, taps = 0, requiredTaps = 10, fishTimer = null;
 
 addEventListener("touchstart", (e) => {
   const currentRod = inventory[selected];
   if(["Rod", "Sun Rod", "Moon Rod", "Ocean Rod"].includes(currentRod)) {
-    if(!fishing && !joy && !e.target.closest("#shop") && !e.target.closest("#upgradesShop") && !e.target.closest("#rules") && !e.target.closest("#fishPreview")) {
+    if(!fishing && !joy && !e.target.closest("#shop") && !e.target.closest("#upgradesShop") && !e.target.closest("#rules") && !e.target.closest("#fishPreview") && e.target.id !== "fishButton") {
       holding = true; 
       holdTime = 0;
     }
@@ -1331,18 +1221,7 @@ function randomFish(currentRod) {
 
 // Enhanced fish button
 function createFishButton() {
- if(fishButton) document.body.removeChild(fishButton);
- fishButton = document.createElement("button");
- fishButton.textContent = "🎯 PRESS HERE! 🎯";
- fishButton.style.position = "fixed";
- fishButton.style.zIndex = "200";
- fishButton.style.borderRadius = "15px";
- fishButton.style.background = "linear-gradient(45deg, #ff6b6b, #ffd93d, #6bcf7f)";
- fishButton.style.color = "black";
- fishButton.style.border = "4px solid #ff4757";
- fishButton.style.fontWeight = "bold";
- fishButton.style.boxShadow = "0 0 30px rgba(255, 107, 107, 0.8)";
- fishButton.style.textShadow = "1px 1px 2px white";
+ const fishButton = document.getElementById("fishButton");
  
  // Apply Bigger Button upgrade
  if(playerUpgrades.biggerButton) {
@@ -1357,30 +1236,7 @@ function createFishButton() {
  const y = Math.random() * (window.innerHeight - 150) + 75;
  fishButton.style.left = x + "px";
  fishButton.style.top = y + "px";
- 
- // Add enhanced animation
- fishButton.style.animation = "enhancedPulse 0.6s infinite alternate";
- 
- // Add enhanced CSS for animation
- if(!document.querySelector('#enhanced-button-styles')) {
-   const style = document.createElement('style');
-   style.id = 'enhanced-button-styles';
-   style.textContent = `
-     @keyframes enhancedPulse {
-       from { 
-         transform: scale(1) rotate(-1deg); 
-         box-shadow: 0 0 30px rgba(255, 107, 107, 0.8);
-       }
-       to { 
-         transform: scale(1.08) rotate(1deg); 
-         box-shadow: 0 0 50px rgba(255, 107, 107, 1);
-       }
-     }
-   `;
-   document.head.appendChild(style);
- }
- 
- document.body.appendChild(fishButton);
+ fishButton.style.display = "block";
 }
 
 function startFishing() {
@@ -1403,8 +1259,7 @@ function startFishing() {
    function failFish() {
      msg.textContent = "😢 Fish escaped!";
      fishing = false;
-     if(fishButton) document.body.removeChild(fishButton);
-     fishButton = null;
+     document.getElementById("fishButton").style.display = "none";
      clearTimeout(fishTimer);
      setTimeout(() => { msg.style.display = "none"; }, 2000);
    }
@@ -1426,8 +1281,7 @@ function startFishing() {
        
        addItem(fish);
        fishing = false;
-       if(fishButton) document.body.removeChild(fishButton);
-       fishButton = null;
+       document.getElementById("fishButton").style.display = "none";
        clearTimeout(fishTimer);
        setTimeout(() => {
          msg.style.display = "none";
@@ -1443,11 +1297,10 @@ function startFishing() {
      const timeLimit = playerUpgrades.fasterFishing ? 1500 : 1000;
      fishTimer = setTimeout(failFish, timeLimit);
      
-     fishButton.onclick = () => {
+     document.getElementById("fishButton").onclick = () => {
        taps++;
        clearTimeout(fishTimer);
-       if(fishButton) document.body.removeChild(fishButton);
-       fishButton = null;
+       document.getElementById("fishButton").style.display = "none";
        nextTap();
      }
    }
@@ -1518,15 +1371,23 @@ function animateUpgradesNPC() {
   upgradesNPCTime += 0.01;
   upgradesNPC.position.y = 2 + Math.sin(upgradesNPCTime * 0.5) * 0.03;
   upgradesNPC.rotation.y = Math.sin(upgradesNPCTime * 0.25) * 0.3;
-  
-  if(staff) {
-    staff.rotation.z = -Math.PI/8 + Math.sin(upgradesNPCTime * 1.1) * 0.08;
-  }
 }
 
 /* ===== ENHANCED MAIN LOOP ===== */
+let oceanTime = 0;
 function animate() {
  requestAnimationFrame(animate);
+ 
+ // Update ocean waves
+ oceanTime += 0.02;
+ const oceanPosition = ocean.geometry.attributes.position;
+ for(let i = 0; i < oceanPosition.count; i++) {
+   const x = oceanPosition.getX(i);
+   const y = oceanPosition.getY(i);
+   const wave = Math.sin(x * 0.05 + oceanTime) * Math.cos(y * 0.05 + oceanTime) * 0.3;
+   oceanPosition.setZ(i, wave);
+ }
+ oceanPosition.needsUpdate = true;
  
  updateRod();
 
