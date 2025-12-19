@@ -157,11 +157,11 @@ html,body{margin:0;padding:0;overflow:hidden;background:black;touch-action:none}
  • Tap fish once to preview<br>
  • Tap twice to sell<br><br>
 
- 🎣 <b>Rods</b><br>
+ 🎣 <b>Rods (2x Better Each Tier)</b><br>
  • Basic Rod – Normal chances<br>
- • Sun Rod – 50% better rare fish<br>
- • Moon Rod – 75% Megalodon chance<br>
- • Ocean Rod – 100% Megalodon chance
+ • Sun Rod – 2x better rare fish<br>
+ • Moon Rod – 4x better rare fish<br>
+ • Ocean Rod – 8x better rare fish
  </p>
  <button onclick="rules.style.display='none'">CLOSE</button>
 </div>
@@ -604,40 +604,74 @@ addEventListener("touchstart",(e)=>{
 });
 addEventListener("touchend",()=>{holding=false; holdTime=0});
 
+// Base probabilities for Basic Rod
+const baseProbabilities = {
+  Kraken: 0.01,          // 1/100
+  Terrorshark: 0.02,     // 1/50
+  Megalodon: 0.02,       // 1/50
+  GreatWhiteShark: 0.01333, // 1/75
+  MantaRay: 0.04,        // 1/25
+  SeaTurtle: 0.20,       // 1/5
+  Pufferfish: 0.3333,    // 1/3
+  Clownfish: 0.2067,     // ~25%
+  Tuna: 0.2067,          // ~25%
+  Shark: 0.4134          // ~50%
+};
+
+// Rod multiplier system (2x each tier)
+const rodMultipliers = {
+  "Rod": 1,      // Base
+  "Sun Rod": 2,  // 2x better
+  "Moon Rod": 4, // 4x better
+  "Ocean Rod": 8 // 8x better
+};
+
 function randomFish(currentRod){
- const r=Math.random();
- 
- // Check for Ocean Rod (100% Megalodon)
- if(currentRod === "Ocean Rod") return "Megalodon";
- 
- // Check for Moon Rod (75% Megalodon, 25% other rares)
- if(currentRod === "Moon Rod"){
-   if(r < 0.75) return "Megalodon";
-   if(r < 0.80) return "Kraken";
-   if(r < 0.85) return "Terrorshark";
-   if(r < 0.90) return "GreatWhiteShark";
-   if(r < 0.92) return "MantaRay";
-   if(r < 0.94) return "SeaTurtle";
-   return "Pufferfish";
- }
- 
- // Sun Rod logic (50% better rare chances)
- if(currentRod === "Sun Rod" && Math.random()<0.5){
-   const rarities=["Kraken","Terrorshark","GreatWhiteShark","Megalodon","MantaRay","SeaTurtle"];
-   return rarities[Math.floor(Math.random()*rarities.length)];
- }
- 
- // Basic rod logic with new fish
- if(r<0.01) return "Kraken";           // 1/100
- else if(r<0.03) return "Terrorshark"; // 1/50 (actually 2/100)
- else if(r<0.02) return "Megalodon";   // 1/50 (actually 2/100)
- else if(r<0.0333) return "GreatWhiteShark"; // 1/75 (actually ~1.33/100)
- else if(r<0.0533) return "MantaRay";  // 1/25 (actually 2/100)
- else if(r<0.2533) return "SeaTurtle"; // 1/5 (actually 20/100)
- else if(r<0.5866) return "Pufferfish"; // 1/3 (actually ~33.33/100)
- else if(r<0.7933) return "Clownfish"; // ~25% (actually ~20.67/100)
- else if(r<1.0) return "Tuna";         // ~25% (actually ~20.67/100)
- else return "Shark";                  // ~50% (actually ~41.34/100)
+  const multiplier = rodMultipliers[currentRod] || 1;
+  const r = Math.random();
+  
+  // Adjust probabilities based on rod multiplier
+  let adjustedProbabilities = {};
+  let total = 0;
+  
+  // Apply multiplier to rare fish probabilities
+  for(const fish in baseProbabilities){
+    let prob = baseProbabilities[fish];
+    
+    // Apply multiplier to rare/ultra rare fish only
+    const isRare = ["Kraken","Terrorshark","Megalodon","GreatWhiteShark","MantaRay","SeaTurtle"].includes(fish);
+    if(isRare && multiplier > 1){
+      // Increase rare fish probability
+      prob = prob * multiplier;
+      // Cap at reasonable maximum
+      if(prob > 0.5) prob = 0.5;
+    } else {
+      // Reduce common fish probability to compensate
+      prob = prob / Math.pow(multiplier, 0.5);
+    }
+    
+    adjustedProbabilities[fish] = prob;
+    total += prob;
+  }
+  
+  // Normalize probabilities
+  let cumulative = 0;
+  const normalizedProbs = {};
+  for(const fish in adjustedProbabilities){
+    normalizedProbs[fish] = adjustedProbabilities[fish] / total;
+  }
+  
+  // Random selection with adjusted probabilities
+  let rand = Math.random();
+  for(const fish in normalizedProbs){
+    cumulative += normalizedProbs[fish];
+    if(rand <= cumulative){
+      return fish;
+    }
+  }
+  
+  // Fallback
+  return "Shark";
 }
 
 function createFishButton(){
@@ -673,7 +707,8 @@ function startFishing(){
 
  setTimeout(()=>{
    const fish=randomFish(currentRod);
-   msg.textContent=fish+"! Catch it by pressing the button!";
+   const multiplier = rodMultipliers[currentRod];
+   msg.textContent=fish+"! Catch it by pressing the button! (Rod: " + multiplier + "x)";
    
    function failFish(){
      msg.textContent="Fish escaped!";
