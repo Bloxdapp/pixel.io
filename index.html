@@ -8,14 +8,53 @@
 html,body{margin:0;padding:0;overflow:hidden;background:black;touch-action:none}
 
 /* UI */
-#money{
+#stats{
  position:fixed;bottom:10px;right:10px;
- color:white;font-size:18px;
+ color:white;
  background:rgba(0,0,0,.7);
  padding:8px 15px;border-radius:10px;
  font-family:'Arial',sans-serif;
  border:2px solid gold;
  box-shadow:0 0 15px rgba(255,215,0,0.3);
+ text-align:center;
+ min-width:120px;
+}
+#stats #money{
+ font-size:18px;
+ margin-bottom:5px;
+ color:gold;
+}
+#stats #level{
+ font-size:16px;
+ color:#00a8ff;
+ margin-bottom:3px;
+}
+#stats #exp{
+ font-size:12px;
+ color:#4CAF50;
+}
+#levelUp{
+ position:fixed;top:50%;left:50%;
+ transform:translate(-50%,-50%);
+ background:rgba(0,0,0,0.9);
+ color:white;
+ padding:30px;
+ border-radius:15px;
+ display:none;
+ z-index:60;
+ text-align:center;
+ border:3px solid gold;
+ box-shadow:0 0 40px gold;
+ animation:levelUpGlow 1s infinite alternate;
+}
+@keyframes levelUpGlow {
+ from { box-shadow:0 0 40px gold; }
+ to { box-shadow:0 0 60px #ff00ff, 0 0 80px gold; }
+}
+#levelUp h3{
+ color:gold;
+ font-size:28px;
+ margin-bottom:10px;
 }
 #book{
  position:fixed;top:10px;left:10px;
@@ -275,7 +314,7 @@ html,body{margin:0;padding:0;overflow:hidden;background:black;touch-action:none}
 /* FISH BUTTON */
 #fishButton {
  position: fixed;
- z-index: 200;
+ z-index: 1000 !important; /* FIX: Ensure it's above everything */
  border-radius: 15px;
  background: linear-gradient(45deg, #ff6b6b, #ffd93d, #6bcf7f);
  color: black;
@@ -298,6 +337,29 @@ html,body{margin:0;padding:0;overflow:hidden;background:black;touch-action:none}
    transform: scale(1.08) rotate(1deg); 
    box-shadow: 0 0 50px rgba(255, 107, 107, 1);
  }
+}
+
+/* PROGRESS BAR */
+#castProgress {
+ position: fixed;
+ top: 50%;
+ left: 50%;
+ transform: translate(-50%, -50%);
+ width: 200px;
+ height: 20px;
+ background: rgba(0,0,0,0.7);
+ border-radius: 10px;
+ border: 2px solid white;
+ display: none;
+ z-index: 35;
+ overflow: hidden;
+}
+#castProgressFill {
+ height: 100%;
+ background: linear-gradient(to right, #4CAF50, #8BC34A);
+ width: 0%;
+ transition: width 0.1s;
+ border-radius: 8px;
 }
 </style>
 </head>
@@ -354,13 +416,38 @@ html,body{margin:0;padding:0;overflow:hidden;background:black;touch-action:none}
 
  ⚡ <b>Upgrades</b><br>
  • Bigger Button – Makes fish button 50% larger<br>
- • Faster Fishing – 1.5s time limit instead of 1s
+ • Faster Fishing – 1.5s time limit instead of 1s<br><br>
+
+ 📈 <b>Level System</b><br>
+ • Gain XP by catching fish<br>
+ • Rarer fish = more XP<br>
+ • Higher levels need more XP<br>
+ • Level up to unlock new features!
  </p>
  </div>
  <button onclick="rules.style.display='none'">CLOSE</button>
 </div>
 
-<div id="money">$0</div>
+<!-- STATS CONTAINER -->
+<div id="stats">
+ <div id="money">$0</div>
+ <div id="level">Level: 1</div>
+ <div id="exp">XP: 0/100</div>
+</div>
+
+<!-- CASTING PROGRESS -->
+<div id="castProgress">
+ <div id="castProgressFill"></div>
+</div>
+
+<!-- LEVEL UP NOTIFICATION -->
+<div id="levelUp">
+ <h3>🎉 LEVEL UP! 🎉</h3>
+ <div id="newLevel" style="font-size:24px;color:gold;margin:10px 0;"></div>
+ <div id="levelReward" style="font-size:18px;color:#4CAF50;margin:10px 0;"></div>
+ <button onclick="levelUp.style.display='none'" style="margin-top:20px;padding:10px 20px;background:linear-gradient(to right, #00a8ff, #0097e6);color:white;border:none;border-radius:8px;cursor:pointer;">CONTINUE</button>
+</div>
+
 <div id="msg"></div>
 <button id="fishButton">🎯 PRESS HERE! 🎯</button>
 
@@ -962,8 +1049,26 @@ jump.addEventListener("touchstart", () => {
  }
 });
 
-/* ENHANCED INVENTORY SYSTEM */
+/* ===== LEVELING SYSTEM ===== */
 let money = 0;
+let playerLevel = 1;
+let playerExp = 0;
+let expToNextLevel = 100;
+
+// Fish XP values (rarer fish = more XP)
+const fishXP = {
+  Clownfish: 5,
+  Tuna: 10,
+  Shark: 15,
+  Pufferfish: 25,
+  SeaTurtle: 50,
+  MantaRay: 100,
+  GreatWhiteShark: 150,
+  Terrorshark: 200,
+  Megalodon: 250,
+  Kraken: 500
+};
+
 const prices = {
   Clownfish: 5, 
   Tuna: 10, 
@@ -977,6 +1082,88 @@ const prices = {
   Kraken: 5000
 };
 
+// Calculate XP needed for next level (exponential scaling)
+function getExpForLevel(level) {
+  // Base 100, increases by 20% each level
+  return Math.floor(100 * Math.pow(1.2, level - 1));
+}
+
+// Add XP and check for level up
+function addXP(fishName) {
+  const xpGained = fishXP[fishName] || 0;
+  playerExp += xpGained;
+  
+  // Show XP gain message
+  msg.style.display = "block";
+  msg.textContent = `+${xpGained} XP from ${fishName}!`;
+  msg.style.color = "#4CAF50";
+  setTimeout(() => {
+    msg.style.display = "none";
+  }, 1500);
+  
+  // Check for level up
+  while(playerExp >= expToNextLevel) {
+    playerExp -= expToNextLevel;
+    playerLevel++;
+    expToNextLevel = getExpForLevel(playerLevel);
+    
+    // Show level up notification
+    showLevelUp();
+  }
+  
+  updateStats();
+  savePlayerData();
+}
+
+// Show level up animation and rewards
+function showLevelUp() {
+  const levelUpDiv = document.getElementById("levelUp");
+  const newLevelSpan = document.getElementById("newLevel");
+  const rewardSpan = document.getElementById("levelReward");
+  
+  newLevelSpan.textContent = `You reached Level ${playerLevel}!`;
+  
+  // Give rewards based on level
+  let rewardText = "";
+  let rewardMoney = 0;
+  
+  if(playerLevel === 2) {
+    rewardMoney = 100;
+    rewardText = "Reward: $100 + New fishing spot unlocked!";
+  } else if(playerLevel === 5) {
+    rewardMoney = 500;
+    rewardText = "Reward: $500 + Better fish chances!";
+  } else if(playerLevel === 10) {
+    rewardMoney = 2000;
+    rewardText = "Reward: $2000 + Legendary fish unlocked!";
+  } else if(playerLevel % 5 === 0) {
+    rewardMoney = playerLevel * 50;
+    rewardText = `Reward: $${rewardMoney} + Level bonus!`;
+  } else {
+    rewardMoney = playerLevel * 10;
+    rewardText = `Reward: $${rewardMoney}`;
+  }
+  
+  // Add money reward
+  if(rewardMoney > 0) {
+    money += rewardMoney;
+    rewardSpan.textContent = rewardText;
+  } else {
+    rewardSpan.textContent = "Keep fishing!";
+  }
+  
+  levelUpDiv.style.display = "block";
+  updateStats();
+}
+
+// Update stats display
+function updateStats() {
+  document.getElementById("money").textContent = `$${money}`;
+  document.getElementById("level").textContent = `Level: ${playerLevel}`;
+  document.getElementById("exp").textContent = `XP: ${playerExp}/${expToNextLevel}`;
+}
+
+/* ENHANCED INVENTORY SYSTEM */
 // Start with 9 slots
 let inventory = ["Rod", "", "", "", "", "", "", "", ""];
 let selected = 0;
@@ -1035,7 +1222,7 @@ function slotTap(index) {
   if(lastTapTime && now - lastTapTime < 500 && selected === index) {
     // Double tap → sell
     money += (prices[name] || 0) * count;
-    document.getElementById("money").textContent = "$" + money;
+    document.getElementById("money").textContent = `$${money}`;
     inventory[index] = "";
     renderInv();
     lastTapTime = 0;
@@ -1091,6 +1278,7 @@ function showFishPreview(fishName, count) {
       <b>${fishName}</b><br>
       Quantity: ${count}<br>
       Value: $${prices[fishName] * count}<br>
+      XP Value: ${fishXP[fishName] || 0} XP<br>
       <small style="color:#ccc">Double tap to sell all</small>
     </div>
   `;
@@ -1229,7 +1417,7 @@ document.getElementById('buySunRod').onclick = () => {
     inventory[i] = "Sun Rod"; 
     renderInv(); 
     money -= 1000; 
-    document.getElementById("money").textContent = "$" + money; 
+    updateStats();
     savePlayerData();
     return;
   }
@@ -1238,7 +1426,7 @@ document.getElementById('buySunRod').onclick = () => {
   if(inventory[i] === "") {
     inventory[i] = "Sun Rod"; 
     money -= 1000; 
-    document.getElementById("money").textContent = "$" + money; 
+    updateStats();
     renderInv(); 
     savePlayerData();
     return;
@@ -1254,7 +1442,7 @@ document.getElementById('buyMoonRod').onclick = () => {
     inventory[i] = "Moon Rod"; 
     renderInv(); 
     money -= 10000; 
-    document.getElementById("money").textContent = "$" + money; 
+    updateStats();
     savePlayerData();
     return;
   }
@@ -1263,7 +1451,7 @@ document.getElementById('buyMoonRod').onclick = () => {
   if(inventory[i] === "") {
     inventory[i] = "Moon Rod"; 
     money -= 10000; 
-    document.getElementById("money").textContent = "$" + money; 
+    updateStats();
     renderInv(); 
     savePlayerData();
     return;
@@ -1279,7 +1467,7 @@ document.getElementById('buyOceanRod').onclick = () => {
     inventory[i] = "Ocean Rod"; 
     renderInv(); 
     money -= 100000; 
-    document.getElementById("money").textContent = "$" + money; 
+    updateStats();
     savePlayerData();
     return;
   }
@@ -1288,7 +1476,7 @@ document.getElementById('buyOceanRod').onclick = () => {
   if(inventory[i] === "") {
     inventory[i] = "Ocean Rod"; 
     money -= 100000; 
-    document.getElementById("money").textContent = "$" + money; 
+    updateStats();
     renderInv(); 
     savePlayerData();
     return;
@@ -1300,7 +1488,7 @@ document.getElementById('buyOceanRod').onclick = () => {
 document.getElementById('buyInventory').onclick = () => {
   if(money < 500) return alert("Not enough money");
   money -= 500;
-  document.getElementById("money").textContent = "$" + money;
+  updateStats();
   expandInventory(3);
   savePlayerData();
 };
@@ -1342,7 +1530,7 @@ document.getElementById('buyBiggerButton').onclick = () => {
   if(money < 5000) return alert("Not enough money!");
   
   money -= 5000;
-  document.getElementById("money").textContent = "$" + money;
+  updateStats();
   playerUpgrades.biggerButton = true;
   
   msg.style.display = "block";
@@ -1362,7 +1550,7 @@ document.getElementById('buyFasterFishing').onclick = () => {
   if(money < 10000) return alert("Not enough money!");
   
   money -= 10000;
-  document.getElementById("money").textContent = "$" + money;
+  updateStats();
   playerUpgrades.fasterFishing = true;
   
   msg.style.display = "block";
@@ -1379,6 +1567,7 @@ document.getElementById('buyFasterFishing').onclick = () => {
 
 /* ===== ENHANCED FISHING SYSTEM ===== */
 let holding = false, holdTime = 0, fishing = false, taps = 0, requiredTaps = 10, fishTimer = null;
+let progressInterval = null;
 
 addEventListener("touchstart", (e) => {
   const currentRod = inventory[selected];
@@ -1386,10 +1575,32 @@ addEventListener("touchstart", (e) => {
     if(!fishing && !joy && !e.target.closest("#shop") && !e.target.closest("#upgradesShop") && !e.target.closest("#rules") && !e.target.closest("#fishPreview") && e.target.id !== "fishButton") {
       holding = true; 
       holdTime = 0;
+      // Show casting progress bar
+      document.getElementById("castProgress").style.display = "block";
+      document.getElementById("castProgressFill").style.width = "0%";
+      
+      // Update progress bar
+      progressInterval = setInterval(() => {
+        holdTime += 0.1;
+        const progress = (holdTime / 2) * 100;
+        document.getElementById("castProgressFill").style.width = progress + "%";
+        
+        if(holdTime >= 2) {
+          clearInterval(progressInterval);
+          document.getElementById("castProgress").style.display = "none";
+          startFishing();
+          holding = false;
+        }
+      }, 100);
     }
   }
 });
-addEventListener("touchend", () => { holding = false; holdTime = 0; });
+addEventListener("touchend", () => { 
+  holding = false; 
+  holdTime = 0;
+  if(progressInterval) clearInterval(progressInterval);
+  document.getElementById("castProgress").style.display = "none";
+});
 
 // Base probabilities for Basic Rod
 const baseProbabilities = {
@@ -1509,6 +1720,9 @@ function startFishing() {
        msg.style.fontSize = isUltraRare ? "32px" : (isRare ? "28px" : "24px");
        msg.textContent = (isUltraRare ? "🔥 ULTRA RARE! " : (isRare ? "🎉 RARE! " : "")) + "Caught " + fish + "! 🎣";
        
+       // Add XP for catching fish
+       addXP(fish);
+       
        // Show fish model briefly
        showFishPreview(fish, 1);
        setTimeout(() => {
@@ -1559,11 +1773,16 @@ function loadPlayerData(name) {
  if(data) {
   const parsed = JSON.parse(data);
   money = parsed.money || 0;
+  playerLevel = parsed.level || 1;
+  playerExp = parsed.exp || 0;
   inventory.splice(0, inventory.length, ...(parsed.inventory || inventory));
   selected = parsed.selected || 0;
   if(parsed.upgrades) playerUpgrades = parsed.upgrades;
+  
+  // Calculate XP needed for current level
+  expToNextLevel = getExpForLevel(playerLevel);
  }
- document.getElementById("money").textContent = "$" + money;
+ updateStats();
  renderInv();
  updateUpgradeButtons();
 }
@@ -1572,6 +1791,8 @@ function savePlayerData() {
  if(!username) return;
  localStorage.setItem("fishingGame_" + username, JSON.stringify({
    money,
+   level: playerLevel,
+   exp: playerExp,
    inventory,
    selected,
    upgrades: playerUpgrades
@@ -1644,14 +1865,6 @@ function animate() {
    player.position.y = 4;
    velocityY = 0;
    grounded = true;
- }
-
- if(holding && !fishing) {
-  holdTime += 0.016;
-  if(holdTime >= 2) {
-    startFishing();
-    holding = false;
-  }
  }
 
  // Animate NPCs
