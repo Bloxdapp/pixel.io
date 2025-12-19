@@ -529,6 +529,49 @@ html,body{margin:0;padding:0;overflow:hidden;background:black;touch-action:none}
  cursor: pointer;
  font-weight: bold;
 }
+
+/* ROD SELECTOR */
+#rodSelector {
+ position: fixed;
+ top: 50%;
+ left: 50%;
+ transform: translate(-50%, -50%);
+ background: linear-gradient(to bottom, rgba(0,30,60,0.95), rgba(0,50,100,0.95));
+ color: white;
+ padding: 25px;
+ border-radius: 15px;
+ display: none;
+ z-index: 90;
+ text-align: center;
+ width: 90%;
+ max-width: 400px;
+ border: 3px solid gold;
+ box-shadow: 0 0 40px gold;
+}
+#rodSelector h3 {
+ color: gold;
+ margin-bottom: 20px;
+}
+.rod-option {
+ margin: 10px;
+ padding: 15px;
+ background: rgba(255,255,255,0.1);
+ border-radius: 10px;
+ cursor: pointer;
+ transition: all 0.2s;
+}
+.rod-option:hover {
+ background: rgba(255,255,255,0.2);
+ transform: translateY(-2px);
+}
+.rod-option.owned {
+ background: rgba(76,175,80,0.3);
+ border: 2px solid #4CAF50;
+}
+.rod-option.not-owned {
+ background: rgba(244,67,54,0.3);
+ border: 2px solid #f44336;
+}
 </style>
 </head>
 <body>
@@ -572,6 +615,7 @@ html,body{margin:0;padding:0;overflow:hidden;background:black;touch-action:none}
      <b>Single tap</b> any fish in inventory → See preview<br>
      <b>Double tap</b> → Sell all of that fish type<br><br>
      Visit the <b>fisherman</b> to buy better rods!<br>
+     <span style="color:#00ffff">NEW:</span> Once you buy a rod, you own it forever!<br>
      Find the portal in the center to access <b>Snowy Island</b> (need Ocean Rod)<br><br>
      Good luck, and happy fishing!
    </p>
@@ -657,7 +701,8 @@ html,body{margin:0;padding:0;overflow:hidden;background:black;touch-action:none}
  • <span style="color:#FF6347">Frostfire Rod</span> – $2,000,000 – 32x better<br>
  • <span style="color:#9370DB">Aurora Rod</span> – $10,000,000 – 64x better<br><br>
 
- <b>IMPORTANT:</b> Ocean Rod unlocks portal to Snowy Island!
+ <b>IMPORTANT:</b> Ocean Rod unlocks portal to Snowy Island!<br>
+ <b>NEW FEATURE:</b> Once you buy a rod, you own it forever!
  </p>
  
  <h3 style="color:#00bcd4">🌐 PORTAL SYSTEM</h3>
@@ -759,6 +804,14 @@ html,body{margin:0;padding:0;overflow:hidden;background:black;touch-action:none}
  <button onclick="secretCodeInput.style.display='none'" style="margin-top:10px;padding:10px 20px;background:linear-gradient(to right, #f44336, #d32f2f);color:white;border:none;border-radius:8px;cursor:pointer;">CANCEL</button>
 </div>
 
+<!-- ROD SELECTOR -->
+<div id="rodSelector">
+ <h3>🎣 Select Fishing Rod</h3>
+ <div id="rodOptions"></div>
+ <br>
+ <button onclick="document.getElementById('rodSelector').style.display='none'" style="background:linear-gradient(to right, #f44336, #d32f2f)">CANCEL</button>
+</div>
+
 <div id="msg"></div>
 <button id="fishButton">🎯 PRESS HERE! 🎯</button>
 
@@ -811,6 +864,9 @@ let currentIsland = 'tropical'; // 'tropical' or 'snowy'
 let portal = null;
 let hasOceanRod = false;
 let tutorialCompleted = false;
+
+// NEW: Track owned rods
+let ownedRods = new Set(["Rod"]); // Start with basic rod
 
 const scene = new THREE.Scene();
 scene.fog = new THREE.Fog(0x87CEEB, 50, 500);
@@ -1545,7 +1601,8 @@ addEventListener("touchstart", e => {
     e.target.closest("#rules") || e.target.closest("#login") || 
     e.target.closest("#fishPreview") || e.target.closest("#snowyShop") ||
     e.target.id === "fishButton" || e.target.id === "secretCode" ||
-    e.target.closest("#tutorial") || e.target.closest("#secretCodeInput")) return;
+    e.target.closest("#tutorial") || e.target.closest("#secretCodeInput") ||
+    e.target.closest("#rodSelector")) return;
  looking = true;
  lastX = e.touches[0].clientX;
  lastY = e.touches[0].clientY;
@@ -1874,6 +1931,119 @@ function updateStats() {
   document.getElementById("exp").textContent = `XP: ${playerExp}/${expToNextLevel}`;
 }
 
+/* ===== NEW: ROD SELECTOR SYSTEM ===== */
+function showRodSelector() {
+  const rodSelector = document.getElementById('rodSelector');
+  const rodOptions = document.getElementById('rodOptions');
+  
+  // Clear previous options
+  rodOptions.innerHTML = '';
+  
+  // Define all rods in order
+  const allRods = [
+    { name: "Rod", price: 0, color: "#8B4513" },
+    { name: "Sun Rod", price: 1000, color: "#ffcc00" },
+    { name: "Moon Rod", price: 10000, color: "#8a2be2" },
+    { name: "Ocean Rod", price: 100000, color: "#00bfff" },
+    { name: "Glacier Rod", price: 500000, color: "#87CEEB" },
+    { name: "Frostfire Rod", price: 2000000, color: "#FF6347" },
+    { name: "Aurora Rod", price: 10000000, color: "#9370DB" }
+  ];
+  
+  // Create rod options
+  allRods.forEach(rod => {
+    const rodDiv = document.createElement('div');
+    rodDiv.className = `rod-option ${ownedRods.has(rod.name) ? 'owned' : 'not-owned'}`;
+    
+    const isOwned = ownedRods.has(rod.name);
+    const isCurrent = inventory[selected] === rod.name;
+    
+    rodDiv.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <strong style="color:${rod.color}">${rod.name}</strong><br>
+          <small>${isOwned ? '✓ OWNED' : `$${rod.price.toLocaleString()}`}</small>
+        </div>
+        ${isCurrent ? '<span style="color:gold">✓ EQUIPPED</span>' : 
+          isOwned ? '<button style="padding:5px 10px;background:#4CAF50;border:none;border-radius:5px;color:white;cursor:pointer">Equip</button>' :
+          '<span style="color:#ccc">Not Purchased</span>'}
+      </div>
+    `;
+    
+    // Add click handler
+    if(isOwned && !isCurrent) {
+      const equipBtn = rodDiv.querySelector('button');
+      equipBtn.onclick = () => {
+        equipRod(rod.name);
+        rodSelector.style.display = 'none';
+      };
+    }
+    
+    rodOptions.appendChild(rodDiv);
+  });
+  
+  rodSelector.style.display = 'block';
+}
+
+function equipRod(rodName) {
+  if(!ownedRods.has(rodName)) {
+    showNotification(`You don't own the ${rodName}!`, 'error');
+    return;
+  }
+  
+  // Find or create slot for the rod
+  let rodSlotIndex = -1;
+  for(let i = 0; i < inventory.length; i++) {
+    if(inventory[i] === rodName) {
+      rodSlotIndex = i;
+      break;
+    }
+  }
+  
+  if(rodSlotIndex === -1) {
+    // Find empty slot or create one
+    for(let i = 0; i < inventory.length; i++) {
+      if(inventory[i] === "") {
+        rodSlotIndex = i;
+        break;
+      }
+    }
+    
+    if(rodSlotIndex === -1) {
+      // No empty slots, replace current selected slot if it's a fish
+      if(!inventory[selected].includes("Rod")) {
+        rodSlotIndex = selected;
+      } else {
+        // Find first non-rod slot
+        for(let i = 0; i < inventory.length; i++) {
+          if(!inventory[i].includes("Rod") && inventory[i] !== "") {
+            rodSlotIndex = i;
+            break;
+          }
+        }
+      }
+    }
+  }
+  
+  if(rodSlotIndex !== -1) {
+    inventory[rodSlotIndex] = rodName;
+    selected = rodSlotIndex;
+    renderInv();
+    updateRod();
+    
+    showNotification(`Equipped ${rodName}!`, 'success');
+    vibrate(100);
+    
+    // Special handling for Ocean Rod
+    if(rodName === "Ocean Rod" && !hasOceanRod) {
+      hasOceanRod = true;
+      activatePortal();
+    }
+    
+    savePlayerData();
+  }
+}
+
 /* ENHANCED INVENTORY SYSTEM */
 let inventory = ["Rod", "", "", "", "", "", "", "", ""];
 let selected = 0;
@@ -1930,7 +2100,13 @@ function slotTap(index) {
   renderInv();
   updateRod();
 
-  if(!name || name.includes("Rod")) return;
+  if(!name) return;
+  
+  // Check if it's a rod - show rod selector instead
+  if(name.includes("Rod")) {
+    showRodSelector();
+    return;
+  }
 
   const now = Date.now();
   
@@ -2085,11 +2261,8 @@ function expandInventory(slots = 3) {
 let rod = null;
 function updateRod() {
   const currentRod = inventory[selected];
-  const tropicalRodTypes = ["Rod", "Sun Rod", "Moon Rod", "Ocean Rod"];
-  const snowyRodTypes = ["Glacier Rod", "Frostfire Rod", "Aurora Rod"];
-  const allRodTypes = tropicalRodTypes.concat(snowyRodTypes);
   
-  if(allRodTypes.includes(currentRod)) {
+  if(currentRod && currentRod.includes("Rod")) {
     if(!rod) {
       rod = new THREE.Mesh(
         new THREE.CylinderGeometry(0.03, 0.03, 1.2, 8),
@@ -2329,63 +2502,38 @@ function setupShopButton(buttonId, price, itemName, callback) {
   };
 }
 
+// NEW: Function to purchase a rod (adds to owned rods)
+function purchaseRod(rodName, price) {
+  // Add to owned rods set
+  ownedRods.add(rodName);
+  
+  // Find a slot for the rod
+  for(let i = 0; i < inventory.length; i++) {
+    if(inventory[i] === "" || inventory[i] === "Rod" || inventory[i].includes("Rod")) {
+      inventory[i] = rodName;
+      selected = i;
+      renderInv();
+      updateRod();
+      
+      // Special handling for Ocean Rod
+      if(rodName === "Ocean Rod") {
+        hasOceanRod = true;
+        activatePortal();
+      }
+      
+      return true;
+    }
+  }
+  
+  // No suitable slot found, just mark as owned
+  showNotification(`${rodName} purchased! Use Rod Selector to equip it.`, 'success');
+  return true;
+}
+
 // Tropical shop buttons
-setupShopButton('buySunRod', 1000, 'Sun Rod', () => {
-  for(let i = 0; i < inventory.length; i++) {
-    if(inventory[i] === "Rod" || inventory[i] === "Moon Rod" || inventory[i] === "Ocean Rod") {
-      inventory[i] = "Sun Rod"; 
-      renderInv(); 
-      return true;
-    }
-  }
-  for(let i = 0; i < inventory.length; i++) {
-    if(inventory[i] === "") {
-      inventory[i] = "Sun Rod"; 
-      renderInv(); 
-      return true;
-    }
-  }
-  showNotification("Inventory full!", 'warning');
-  return false;
-});
-
-setupShopButton('buyMoonRod', 10000, 'Moon Rod', () => {
-  for(let i = 0; i < inventory.length; i++) {
-    if(inventory[i] === "Rod" || inventory[i] === "Sun Rod" || inventory[i] === "Ocean Rod") {
-      inventory[i] = "Moon Rod"; 
-      renderInv(); 
-      return true;
-    }
-  }
-  for(let i = 0; i < inventory.length; i++) {
-    if(inventory[i] === "") {
-      inventory[i] = "Moon Rod"; 
-      renderInv(); 
-      return true;
-    }
-  }
-  showNotification("Inventory full!", 'warning');
-  return false;
-});
-
-setupShopButton('buyOceanRod', 100000, 'Ocean Rod', () => {
-  for(let i = 0; i < inventory.length; i++) {
-    if(inventory[i] === "Rod" || inventory[i] === "Sun Rod" || inventory[i] === "Moon Rod") {
-      inventory[i] = "Ocean Rod"; 
-      renderInv(); 
-      return true;
-    }
-  }
-  for(let i = 0; i < inventory.length; i++) {
-    if(inventory[i] === "") {
-      inventory[i] = "Ocean Rod"; 
-      renderInv(); 
-      return true;
-    }
-  }
-  showNotification("Inventory full!", 'warning');
-  return false;
-});
+setupShopButton('buySunRod', 1000, 'Sun Rod', () => purchaseRod("Sun Rod", 1000));
+setupShopButton('buyMoonRod', 10000, 'Moon Rod', () => purchaseRod("Moon Rod", 10000));
+setupShopButton('buyOceanRod', 100000, 'Ocean Rod', () => purchaseRod("Ocean Rod", 100000));
 
 setupShopButton('buyInventory', 500, '3 Inventory Slots', () => {
   expandInventory(3);
@@ -2393,62 +2541,9 @@ setupShopButton('buyInventory', 500, '3 Inventory Slots', () => {
 });
 
 // Snowy shop buttons
-setupShopButton('buyGlacierRod', 500000, 'Glacier Rod', () => {
-  for(let i = 0; i < inventory.length; i++) {
-    if(inventory[i].includes("Rod")) {
-      inventory[i] = "Glacier Rod"; 
-      renderInv(); 
-      return true;
-    }
-  }
-  for(let i = 0; i < inventory.length; i++) {
-    if(inventory[i] === "") {
-      inventory[i] = "Glacier Rod"; 
-      renderInv(); 
-      return true;
-    }
-  }
-  showNotification("Inventory full!", 'warning');
-  return false;
-});
-
-setupShopButton('buyFrostfireRod', 2000000, 'Frostfire Rod', () => {
-  for(let i = 0; i < inventory.length; i++) {
-    if(inventory[i].includes("Rod")) {
-      inventory[i] = "Frostfire Rod"; 
-      renderInv(); 
-      return true;
-    }
-  }
-  for(let i = 0; i < inventory.length; i++) {
-    if(inventory[i] === "") {
-      inventory[i] = "Frostfire Rod"; 
-      renderInv(); 
-      return true;
-    }
-  }
-  showNotification("Inventory full!", 'warning');
-  return false;
-});
-
-setupShopButton('buyAuroraRod', 10000000, 'Aurora Rod', () => {
-  for(let i = 0; i < inventory.length; i++) {
-    if(inventory[i].includes("Rod")) {
-      inventory[i] = "Aurora Rod"; 
-      renderInv(); 
-      return true;
-    }
-  }
-  for(let i = 0; i < inventory.length; i++) {
-    if(inventory[i] === "") {
-      inventory[i] = "Aurora Rod"; 
-      renderInv(); 
-      return true;
-    }
-  }
-  showNotification("Inventory full!", 'warning');
-  return false;
-});
+setupShopButton('buyGlacierRod', 500000, 'Glacier Rod', () => purchaseRod("Glacier Rod", 500000));
+setupShopButton('buyFrostfireRod', 2000000, 'Frostfire Rod', () => purchaseRod("Frostfire Rod", 2000000));
+setupShopButton('buyAuroraRod', 10000000, 'Aurora Rod', () => purchaseRod("Aurora Rod", 10000000));
 
 setupShopButton('buySnowyInventory', 2000, '5 Inventory Slots', () => {
   expandInventory(5);
@@ -2474,6 +2569,19 @@ function loadPlayerData(name) {
   inventory.splice(0, inventory.length, ...(parsed.inventory || inventory));
   selected = parsed.selected || 0;
   if(parsed.currentIsland) currentIsland = parsed.currentIsland;
+  
+  // Load owned rods
+  if(parsed.ownedRods) {
+    ownedRods = new Set(parsed.ownedRods);
+  } else {
+    // Legacy support: check inventory for owned rods
+    ownedRods = new Set(["Rod"]);
+    inventory.forEach(item => {
+      if(item && item.includes("Rod")) {
+        ownedRods.add(item);
+      }
+    });
+  }
   
   // Calculate XP needed for current level
   expToNextLevel = getExpForLevel(playerLevel);
@@ -2517,7 +2625,8 @@ function savePlayerData() {
    exp: playerExp,
    inventory,
    selected,
-   currentIsland
+   currentIsland,
+   ownedRods: Array.from(ownedRods)
  }));
 }
 
@@ -2720,7 +2829,7 @@ function startFishing() {
  const snowyRods = ["Glacier Rod", "Frostfire Rod", "Aurora Rod"];
  const allRods = tropicalRods.concat(snowyRods);
  
- if(!allRods.includes(currentRod)) {
+ if(!currentRod || !allRods.includes(currentRod)) {
    showNotification("Equip a fishing rod first!", 'warning');
    return;
  }
@@ -2844,10 +2953,11 @@ addEventListener("touchstart", (e) => {
   const snowyRods = ["Glacier Rod", "Frostfire Rod", "Aurora Rod"];
   const allRods = tropicalRods.concat(snowyRods);
   
-  if(allRods.includes(currentRod)) {
+  if(currentRod && allRods.includes(currentRod)) {
     if(!fishing && !joy && !e.target.closest("#shop") && !e.target.closest("#snowyShop") && 
        !e.target.closest("#rules") && !e.target.closest("#fishPreview") && 
        !e.target.closest("#secretCodeInput") && !e.target.closest("#tutorial") &&
+       !e.target.closest("#rodSelector") &&
        e.target.id !== "fishButton" && e.target.id !== "joystick" && 
        e.target.id !== "stick" && e.target.id !== "jump" &&
        !e.target.closest(".slot")) {
