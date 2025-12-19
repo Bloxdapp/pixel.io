@@ -594,11 +594,13 @@ Object.values(fishModels).forEach(fish => {
   fish.receiveShadow = true;
 });
 
-/* SIMPLE TREES (NO BUSHES) */
+/* ENHANCED TREES WITH MULTIPLE LAYERS */
 const vegetation = new THREE.Group();
 
 function createTree(x, z) {
   const tree = new THREE.Group();
+  
+  // Trunk
   const trunk = new THREE.Mesh(
     new THREE.CylinderGeometry(0.4, 0.6, 8, 8),
     new THREE.MeshLambertMaterial({ color: 0x8b5a2b })
@@ -606,22 +608,74 @@ function createTree(x, z) {
   trunk.position.y = 4;
   tree.add(trunk);
   
-  const leaves = new THREE.Mesh(
-    new THREE.ConeGeometry(3.0, 3.0, 8),
-    new THREE.MeshLambertMaterial({ color: 0x228B22 })
+  // Multiple layers of leaves (3 layers for fuller look)
+  const leafColors = [0x228B22, 0x32CD32, 0x3CB371];
+  
+  // Bottom layer - largest
+  const leaves1 = new THREE.Mesh(
+    new THREE.ConeGeometry(3.5, 3.0, 10),
+    new THREE.MeshLambertMaterial({ color: leafColors[0] })
   );
-  leaves.position.y = 7;
-  tree.add(leaves);
+  leaves1.position.y = 7;
+  tree.add(leaves1);
+  
+  // Middle layer - medium
+  const leaves2 = new THREE.Mesh(
+    new THREE.ConeGeometry(2.8, 2.5, 10),
+    new THREE.MeshLambertMaterial({ color: leafColors[1] })
+  );
+  leaves2.position.y = 8.5;
+  tree.add(leaves2);
+  
+  // Top layer - smallest
+  const leaves3 = new THREE.Mesh(
+    new THREE.ConeGeometry(2.0, 2.0, 10),
+    new THREE.MeshLambertMaterial({ color: leafColors[2] })
+  );
+  leaves3.position.y = 9.8;
+  tree.add(leaves3);
+  
+  // Add some random branches (small cones)
+  for(let i = 0; i < 4; i++) {
+    const branch = new THREE.Mesh(
+      new THREE.ConeGeometry(0.8, 1.5, 6),
+      new THREE.MeshLambertMaterial({ color: 0x228B22 })
+    );
+    branch.position.set(
+      (Math.random() - 0.5) * 2,
+      5 + Math.random() * 2,
+      (Math.random() - 0.5) * 2
+    );
+    branch.rotation.x = Math.random() * 0.5;
+    branch.rotation.z = Math.random() * 0.5;
+    tree.add(branch);
+  }
   
   tree.position.set(x, 1.5, z);
+  tree.rotation.y = Math.random() * Math.PI * 2;
   return tree;
 }
 
-for(let i = 0; i < 10; i++) {
+// Place trees
+for(let i = 0; i < 12; i++) {
   const angle = Math.random() * Math.PI * 2;
   const radius = 10 + Math.random() * 15;
   const tree = createTree(Math.cos(angle) * radius, Math.sin(angle) * radius);
-  vegetation.add(tree);
+  
+  // Check distance from NPCs to avoid placing trees on them
+  const distFromFisherman = Math.sqrt(
+    Math.pow(tree.position.x - fisherman.position.x, 2) +
+    Math.pow(tree.position.z - fisherman.position.z, 2)
+  );
+  
+  const distFromUpgradesNPC = Math.sqrt(
+    Math.pow(tree.position.x - upgradesNPC.position.x, 2) +
+    Math.pow(tree.position.z - upgradesNPC.position.z, 2)
+  );
+  
+  if(distFromFisherman > 5 && distFromUpgradesNPC > 5) {
+    vegetation.add(tree);
+  }
 }
 
 scene.add(vegetation);
@@ -1420,8 +1474,7 @@ function animate() {
  animateFisherman();
  animateUpgradesNPC();
 
- // Animate vegetation
- vegetation.rotation.y += 0.0005;
+ // REMOVED: vegetation.rotation.y += 0.0005; - Island no longer moves or turns
 
  renderer.render(scene, camera);
 }
